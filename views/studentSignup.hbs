@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--css-->
+        <link rel="stylesheet" href="/css/loginsignup.css">
+    <title>Registration Form</title>
+
+    <script>
+    // JavaScript to clear error messages on input or change
+    document.addEventListener("DOMContentLoaded", function () {
+      const fields = document.querySelectorAll('input, select'); // Include inputs and select elements
+
+      fields.forEach(field => {
+        const eventType = field.tagName === 'SELECT' ? 'change' : 'input'; // Use 'change' for select and 'input' for inputs
+
+        field.addEventListener(eventType, function () {
+          const errorDiv = this.nextElementSibling; // Assumes error message is the next sibling
+          if (errorDiv && errorDiv.classList.contains('error')) {
+            errorDiv.textContent = ''; // Clear error message
+          }
+        });
+      });
+      let hasErrors = false;
+
+            fields.forEach(field => {
+                const errorDiv = field.parentElement.querySelector('.error'); // Find the associated error div
+
+                // If the field has an error, clear its content
+                if (errorDiv && errorDiv.textContent.trim()) {
+                    field.value = '';  // Clear the content of the invalid field
+                    hasErrors = true;  // Mark that there are errors
+                }
+            });
+
+            // If there are errors, prevent form submission
+            if (hasErrors) {
+                event.preventDefault();  // Prevent the form from being submitted
+            }
+    });
+  </script>
+
+</head>
+<body>
+ {{#if error}}
+    <p style="color: red;">{{error}}</p>
+    {{/if}}
+    <div class="container">
+        <div class="forms">
+            <div class="form login">
+                <span class="title">Student Registration Form</span>
+
+                <form id="RegForm" action="/studentsignup"  method="post"> 
+                    <!--name,username,email,password,phone-->
+
+                    <div class="input-field">
+                        <input type="text" name="name" id="name" placeholder="Enter Your Name" value="{{name}}" >
+                        {{#if errors.name}}
+            <div class="error">{{errors.name}}</div>
+        {{/if}} 
+                    </div>
+                    <div class="input-field">
+                        <input type="text" name="email" id="email" placeholder="Enter Your Email Id"value="{{email}}"  >
+                       {{#if errors.email}}
+            <div class="error">{{errors.email}}</div>
+        {{/if}} 
+                    </div>  
+                    <div class="input-field">
+                        <input type="phone" name="phone" id="phone" placeholder="Enter Your phone" value="{{phone}}">
+                        {{#if errors.phone}}
+            <div class="error">{{errors.phone}}</div>
+        {{/if}} 
+                    </div> 
+                    <div class="input-field">
+                       <input type="text" name="username" id="username" placeholder="Enter Username" value="{{username}}">
+
+                       {{#if errors.username}}
+  <div class="error">{{errors.username}}</div>
+  {{/if}} 
+  <div id="usernameError" class="error"></div> <!-- Error message for real-time validation -->
+                    </div> 
+                    <div class="input-field">
+                        <input type="password" id="password" name="password"  placeholder="Password"  value="{{password}}">
+                        {{#if errors.password}}
+            <div class="error">{{errors.password}}</div>
+        {{/if}} 
+                    </div>  
+
+   <!--role-->
+     <div class="input-field">
+                         <div class="p"> 
+                              <p id="year">Role </p>
+                         </div>
+   
+                        <div class="options">
+                             <select name="usertype" id="usertype" class="option" >
+                               
+                                <option value="Student">Student</option>
+                               
+                                
+                            </select>
+                           {{#if errors.usertype}}
+            <div class="error">{{errors.usertype}}</div>
+        {{/if}} 
+                        </div>
+                    </div>
+                 
+
+
+
+                    <!--academicyear-->
+                     <div class="input-field">
+                         <div class="p"> 
+                              <p id="year">Course </p>
+                         </div>
+   
+                        <div class="options">
+                             <select name="course" id="course" class="option" >
+                                <option value=""></option>
+                                <option value="MCA">MCA</option>
+                                <option value="MSC">MSC</option>
+                                
+                            </select>
+                           {{#if errors.course}}
+            <div class="error">{{errors.course}}</div>
+        {{/if}} 
+                        </div>
+                    </div>
+                 
+
+                    <!--semester-->    
+                 
+                    <div class="input-field">
+                        <div class="p"> 
+                            <p>Semester</p>
+                        </div>
+
+                        <div class="options">
+                            <select  name="semester" id="semester" class="option" >
+                                <option value=""></option>
+                                <option value="S1">S1</option>
+                                <option value="S2">S2</option>
+                                <option value="S3">S3</option>
+                                <option value="S4">S4</option>
+                                <option value="S5">S5</option>
+                                <option value="S6">S6</option>
+
+                            </select>
+                            {{#if errors.semester}}
+            <div class="error">{{errors.semester}}</div>
+        {{/if}} 
+                        </div>
+                    </div>
+                    
+<!--gender-->
+
+<!--button-->
+<button  class="button" type="submit">Register </button>
+
+</form>
+            </div>
+        </div>
+    </div>
+
+   <!-- <script src="RegScript.js"></script>   -->
+    
+</body>
+</html>

@@ -1,0 +1,148 @@
+/* Google Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(6, 33, 58);
+    padding: 10px;
+}
+
+.container {
+    position: relative;
+    max-width: 430px;
+    width: 100%;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+.p{
+    font-size: 200px;
+}
+
+.container .form {
+    padding: 20px 30px;
+}
+
+.container .form .title {
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-field {
+    margin-top: 15px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-field input,
+.options select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #140784;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.input-field input:focus,
+.options select:focus {
+    outline: none;
+    border-color: rgb(66, 84, 221);
+    box-shadow: 0 0 3px rgb(67, 57, 209);
+}
+
+.input-field .p {
+    margin-bottom: 5px;
+    font-size: 20px;
+    color: rgb(64, 63, 63);
+}
+
+.button {
+    width: 100%;
+    padding: 12px 0;
+    margin-top: 20px;
+    background-color: rgb(6, 33, 58);
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: rgb(4, 24, 46);
+}
+
+.error {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+
+
+/* Media Queries */
+
+/* Tablet and smaller */
+@media (max-width: 768px) {
+    .container {
+        max-width: 90%;
+    }
+
+    .container .form .title {
+        font-size: 20px;
+    }
+
+    .button {
+        font-size: 14px;
+    }
+}
+
+/* Mobile and smaller */
+@media (max-width: 480px) {
+    .container {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .container .form {
+        padding: 15px;
+    }
+
+    .container .form .title {
+        font-size: 18px;
+    }
+
+    .input-field input,
+    .options select {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .input-field .p {
+        font-size: 14px;
+    }
+
+    .button {
+        font-size: 13px;
+        padding: 10px 0;
+    }
+
+    
+}
