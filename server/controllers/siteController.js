@@ -100,6 +100,7 @@ module.exports = {
             // Redirect to welcome page
             res.render("welcomeSignup", { name: data.name });
         } catch (error) {
+          
             console.error("Error during signup:", error);
             res.send("Error during signup. Please try again.");
         }
@@ -360,6 +361,18 @@ module.exports = {
           
             res.render('viewStudTimetable');
          
+          },
+          //logut handling
+          logout:async(req,res)=>{
+            // For session-based authentication
+            req.session.destroy((err) => {
+            if (err) {
+               console.error(err);
+                 return res.redirect('/studentHome'); // Redirect to home even if an error occurs
+            }
+            res.clearCookie('connect.sid'); // Clear the session cookie
+            return res.redirect('/login'); // Redirect to the login page
+           });
           }
         
 

@@ -12,6 +12,7 @@ router.get('/studentprofile', siteControllers.studentProfile);
 router.get('/facultyProfile', siteControllers.facultyProfile);
 router.get('/viewStudTimetable', siteControllers.viewStudTimetable);
 router.get('/viewFacTimetable', siteControllers.viewFacTimetable);
+router.get('/logout', siteControllers.logout);
 
 
 
