@@ -1,7 +1,7 @@
 require('../models/database');
 const studentCollection = require('../models/studentUser');
 const facultyCollection = require('../models/facultyUser');
-
+const timeTableCollection = require("../models/timetable");
 
 module.exports = {
     login: async(req,res)=>{
@@ -275,6 +275,38 @@ module.exports = {
                   res.send("Error during login. Please try again.");
                 }
               }
+              else if(usertype==='HOD'){
+                try {
+                  const user = await facultyCollection.findOne({ username });
+              
+                  // Check if the username exists
+                  if (!user) {
+                    errors.username = "Username not found.";
+                    return res.render("login", { errors, username,password });
+                  }
+              
+                  // Check if the password matches
+                  if (user.password !== password) {
+                    errors.password = "Incorrect password.";
+                    return res.render("login", { errors, username });
+                  }
+                  if (user.usertype !== usertype) {
+                    errors.usertype = "Role not matched.";
+                    return res.render("login", { errors, username,password });
+                  }
+                  // Store user info in session
+                  req.session.username = user.username;
+                  req.session.name = user.name;
+                  req.session.usertype = user.usertype;         
+                  // Redirect to home page and pass the username          
+                  
+                   res.render('hodHome',{ name: user.name });                                               
+                } 
+                catch (error) {
+                  console.error("Error during login:", error);
+                  res.send("Error during login. Please try again.");
+                }
+              }
 
             },
                        //DIRECTING TO HOME PAGE
@@ -296,6 +328,14 @@ module.exports = {
             }
             res.render('facultyHome', { name }); // Pass the name to the view
         },
+        hodHome: async (req, res) => {
+          const name = req.session.name;
+       
+          if (!name) {
+              return res.redirect('/login'); // Redirect to login if session is not set
+          }
+          res.render('hodHome', { name }); // Pass the name to the view
+      },
  
           studentProfile:async(req,res)=>{
             const name = req.session.name;
@@ -362,6 +402,56 @@ module.exports = {
             res.render('viewStudTimetable');
          
           },
+          saveTimeTable:async(req,res)=>{
+            const { subject1 } = req.body; 
+        
+            const data = {
+               day:req.body.day,
+               'firstPeriod.0.subject':req.body.subject1,
+               'firstPeriod.0.startingTime':req.body.startTime1,
+               'firstPeriod.0.endingTime':req.body.endTime1,
+               'firstPeriod.0.tutor':req.body.tutor1,
+               'secondPeriod.0.subject':req.body.subject2,
+               'secondPeriod.0.startingTime':req.body.startTime2,
+               'secondPeriod.0.endingTime':req.body.endTime2,
+               'secondPeriod.0.tutor':req.body.tutor2,
+               'thirdPeriod.0.subject':req.body.subject3,
+               'thirdPeriod.0.startingTime':req.body.startTime3,
+               'thirdPeriod.0.endingTime':req.body.endTime3,
+               'thirdPeriod.0.tutor':req.body.tutor3,
+               'fourthPeriod.0.subject':req.body.subject4,
+               'fourthPeriod.0.startingTime':req.body.startTime4,
+               'fourthPeriod.0.endingTime':req.body.endTime4,
+               'fourthPeriod.0.tutor':req.body.tutor4,
+               'fifthPeriod.0.subject':req.body.subject5,
+               'fifthPeriod.0.startingTime':req.body.startTime5,
+               'fifthPeriod.0.endingTime':req.body.endTime5,
+               'fifthPeriod.0.tutor':req.body.tutor5
+            }
+            console.log(data);
+            await timeTableCollection.insertMany([data]);
+          },
+          editTimeTable:async(req,res)=>{
+             res.render("editeTimeTable")
+          },
+          getTimeTable:async(req,res)=>{
+            const { course,semester } = req.body; 
+            console.log(course);
+            console.log(semester);
+            
+          },
+          viewTimeTable:async(req,res)=>{
+            //const data = req.body;  // Store the entire request body
+            const { course } = req.body; 
+           // const { usertype } = req.body; 
+      
+      if(course==='Mca'){
+        res.render("hodHome");
+      } // Destructure individual fields from `data`
+           
+              console.log(course);
+              console.log("view Time table...");
+          },
           //logut handling
           logout:async(req,res)=>{
             // For session-based authentication
@@ -373,6 +463,19 @@ module.exports = {
             res.clearCookie('connect.sid'); // Clear the session cookie
             return res.redirect('/login'); // Redirect to the login page
            });
+          },
+          editeTimetable:async(req,res)=>{
+            return res.render('editeTimeTable'); 
+          },
+          classSelect:async(req,res)=>{
+            return res.render('classSelect'); 
+          },
+          timetable:async(req,res)=>{
+            const data = await timeTableCollection.find();
+            for(let i = 0;i<5;i++){
+              console.log(data[i])
+            }
+            res.render('timeTable',{data:data}); 
           }
         
 

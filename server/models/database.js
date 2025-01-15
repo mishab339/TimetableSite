@@ -13,3 +13,4 @@ mongoose.connect(mongoURI)
 
 require('./studentUser');
 require('./facultyUser');
+require("./timetable");

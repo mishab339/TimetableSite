@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timetable</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #343a40;
+        }
+
+        .selection-container {
+            width: 90%;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .selection-container select {
+            padding: 8px;
+            font-size: 16px;
+            margin: 10px;
+        }
+
+        .table-container {
+            width: 90%;
+            margin: 20px auto;
+            overflow-x: auto;
+            background-color: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+
+        th {
+            background-color: #062e58;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .btn {
+            padding: 6px 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .view-time-table{
+
+        }
+
+        .btn:hover {
+            background-color: #218838;
+        }
+
+        @media (max-width: 768px) {
+            th,
+            td {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .btn {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Edit Timetable</h1>
+    <form action="/get-timeTable" method="post">
+    <div class="selection-container">
+        <label for="course">Select Course:</label>
+        <select name="course" id="course">
+            <option value="">--Select Course--</option>
+            <option   value="Mca">MCA</option>
+            <option value="Msc">MSC</option>
+        </select>
+        <label for="semester">Select Semester:</label>
+        <select name="semester" id="semester">
+            <option value="">--Select Semester--</option>
+            <option value="S1">Semester 1</option>
+            <option value="S2">Semester 2</option>
+        </select>
+         <button type="submit" class="view-time-table"><a>view Time Table</a></button>
+    </div>
+   
+    </form>
+
+    <!-- Timetable -->
+    <div class="table-container" id="timetable">
+        <table>
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Subject</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Tutor</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#each data}}
+                <tr>
+                    <td rowspan="5">{{day}}</td>
+                    <td>{{firstPeriod.0.subject}} </td>
+                    <td>{{firstPeriod.0.startingTime}}</td>
+                    <td>{{firstPeriod.0.endingTime}}</td>
+                    <td>{{firstPeriod.0.tutor}}</td>
+                    <td rowspan="5">
+                        <button class="btn" onclick="redirectToEditPage('Monday')"><a href="/edit-timetable/{{this._id}}">Edit</a></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>{{secondPeriod.0.subject}}</td>
+                    <td>{{secondPeriod.0.startingTime}}</td>
+                    <td>{{secondPeriod.0.endingTime}}</td>
+                    <td>{{secondPeriod.0.tutor}}</td>
+                </tr>
+                <tr>
+                    <td>{{thirdPeriod.0.subject}}</td>
+                    <td>{{thirdPeriod.0.startingTime}}</td>
+                    <td>{{thirdPeriod.0.endingTime}}</td>
+                    <td>{{thirdPeriod.0.tutor}}</td>
+                </tr>
+                <tr>
+                    <td>{{fourthPeriod.0.subject}}</td>
+                    <td>{{fourthPeriod.0.startingTime}}</td>
+                    <td>{{fourthPeriod.0.endingTime}}</td>
+                    <td>{{fourthPeriod.0.tutor}}</td>
+                </tr>
+                <tr>
+                    <td>{{fifthPeriod.0.subject}}</td>
+                    <td>{{fifthPeriod.0.startingTime}}</td>
+                    <td>{{fifthPeriod.0.endingTime}}</td>
+                    <td>{{fifthPeriod.0.tutor}}</td>
+                </tr>
+            {{/each}}
+               <!-- <tr>
+                    <td rowspan="5">Tuesday</td>
+                    <td>Mathematics</td>
+                    <td>09:00 AM</td>
+                    <td>10:00 AM</td>
+                    <td>Mr. Smith</td>
+                    <td rowspan="5">
+                        <button class="btn" onclick="redirectToEditPage('Tuesday')">Edit</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Physics</td>
+                    <td>10:15 AM</td>
+                    <td>11:15 AM</td>
+                    <td>Ms. Johnson</td>
+                </tr>
+                <tr>
+                    <td>Chemistry</td>
+                    <td>11:30 AM</td>
+                    <td>12:30 PM</td>
+                    <td>Dr. Brown</td>
+                </tr>
+                <tr>
+                    <td>Biology</td>
+                    <td>01:00 PM</td>
+                    <td>02:00 PM</td>
+                    <td>Dr. Green</td>
+                </tr>
+                <tr>
+                    <td>Computer Science</td>
+                    <td>02:15 PM</td>
+                    <td>03:15 PM</td>
+                    <td>Mr. White</td>
+                </tr>
+                <tr>
+                    <td rowspan="5">wednesday</td>
+                    <td>Mathematics</td>
+                    <td>09:00 AM</td>
+                    <td>10:00 AM</td>
+                    <td>Mr. Smith</td>
+                    <td rowspan="5">
+                        <button class="btn" onclick="redirectToEditPage('Wednesday')">Edit</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Physics</td>
+                    <td>10:15 AM</td>
+                    <td>11:15 AM</td>
+                    <td>Ms. Johnson</td>
+                </tr>
+                <tr>
+                    <td>Chemistry</td>
+                    <td>11:30 AM</td>
+                    <td>12:30 PM</td>
+                    <td>Dr. Brown</td>
+                </tr>
+                <tr>
+                    <td>Biology</td>
+                    <td>01:00 PM</td>
+                    <td>02:00 PM</td>
+                    <td>Dr. Green</td>
+                </tr>
+                <tr>
+                    <td>Computer Science</td>
+                    <td>02:15 PM</td>
+                    <td>03:15 PM</td>
+                    <td>Mr. White</td>
+                </tr>
+                <tr>
+                    <td rowspan="5">Thursday</td>
+                    <td>Mathematics</td>
+                    <td>09:00 AM</td>
+                    <td>10:00 AM</td>
+                    <td>Mr. Smith</td>
+                    <td rowspan="5">
+                        <button class="btn" onclick="redirectToEditPage('Thursday')">Edit</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Physics</td>
+                    <td>10:15 AM</td>
+                    <td>11:15 AM</td>
+                    <td>Ms. Johnson</td>
+                </tr>
+                <tr>
+                    <td>Chemistry</td>
+                    <td>11:30 AM</td>
+                    <td>12:30 PM</td>
+                    <td>Dr. Brown</td>
+                </tr>
+                <tr>
+                    <td>Biology</td>
+                    <td>01:00 PM</td>
+                    <td>02:00 PM</td>
+                    <td>Dr. Green</td>
+                </tr>
+                <tr>
+                    <td>Computer Science</td>
+                    <td>02:15 PM</td>
+                    <td>03:15 PM</td>
+                    <td>Mr. White</td>
+                </tr>
+                <tr>
+                    <td rowspan="5">friday</td>
+                    <td>Mathematics</td>
+                    <td>09:00 AM</td>
+                    <td>10:00 AM</td>
+                    <td>Mr. Smith</td>
+                    <td rowspan="5">
+                        <button class="btn" onclick="redirectToEditPage('Friday')"><a href="/">Edit</a></button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Physics</td>
+                    <td>10:15 AM</td>
+                    <td>11:15 AM</td>
+                    <td>Ms. Johnson</td>
+                </tr>
+                <tr>
+                    <td>Chemistry</td>
+                    <td>11:30 AM</td>
+                    <td>12:30 PM</td>
+                    <td>Dr. Brown</td>
+                </tr>
+                <tr>
+                    <td>Biology</td>
+                    <td>01:00 PM</td>
+                    <td>02:00 PM</td>
+                    <td>Dr. Green</td>
+                </tr>
+                <tr>
+                    <td>Computer Science</td>
+                    <td>02:15 PM</td>
+                    <td>03:15 PM</td>
+                    <td>Mr. White</td>
+                </tr>
+                -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const courseSelect = document.getElementById('course');
+        const semesterSelect = document.getElementById('semester');
+        const timetableContainer = document.getElementById('timetable');
+
+        // Show the timetable if both course and semester are selected
+     /**   function showTimetable() {
+            if (courseSelect.value && semesterSelect.value) {
+                timetableContainer.style.display = 'block';
+            } else {
+                timetableContainer.style.display = 'none';
+            }
+        }*/
+
+        // Save course and semester to localStorage when selected
+       /** function saveSelectionsToLocalStorage() {
+            localStorage.setItem('selectedCourse', courseSelect.value);
+            localStorage.setItem('selectedSemester', semesterSelect.value);
+        }*/
+
+        // Reset the selections (clear course and semester) and hide timetable when page loads
+       /** function resetSelectionsOnLoad() {
+            courseSelect.value = "";
+            semesterSelect.value = "";
+            timetableContainer.style.display = 'none';  // Ensure timetable is hidden initially
+        }*/
+
+        // Check if we came from the edit page and clear selections
+        /**function checkIfComingFromEditPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromEditPage = urlParams.has('day'); // If there's a "day" parameter, we assume we came from the edit page
+
+            if (fromEditPage) {
+                resetSelectionsOnLoad(); // Clear selections if we came back from the edit page
+            } else {
+                // If no "day" parameter, load from localStorage (if available)
+                const selectedCourse = localStorage.getItem('selectedCourse');
+                const selectedSemester = localStorage.getItem('selectedSemester');
+
+                if (selectedCourse && selectedSemester) {
+                    courseSelect.value = selectedCourse;
+                    semesterSelect.value = selectedSemester;
+                }
+            }
+
+            showTimetable();  // Evaluate timetable visibility
+        }
+
+        // Call checkIfComingFromEditPage on page load
+        checkIfComingFromEditPage();
+
+        // Event listeners to update localStorage when the user selects a course or semester
+        courseSelect.addEventListener('change', function() {
+            saveSelectionsToLocalStorage();
+            showTimetable();  // Re-evaluate to show the timetable when course is selected
+        });
+
+        semesterSelect.addEventListener('change', function() {
+            saveSelectionsToLocalStorage();
+            showTimetable();  // Re-evaluate to show the timetable when semester is selected
+        });
+
+        // Redirect to the edit page for the selected day
+        function redirectToEditPage(day) {
+            window.location.href = `edit.html?day=${encodeURIComponent(day)}`;
+        }*/
+    </script>
+</body>
+
+</html>
