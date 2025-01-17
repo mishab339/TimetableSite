@@ -16,17 +16,17 @@
             <div class="form login">
                 <span class="title">Choose Course And Semester</span>
 
-                <form id="loginForms" action="/submitClassSelected" method="post"> 
+        <form id="loginForms" action="/addTimeTable" method="post"> 
                 <!--role-->
-                     <div class="input-field">
+        <div class="input-field">
         <div class="p"> 
             <p>Course</p>
         </div>
         <div class="options">
             <select name="course" id="course" class="option">
                                 <option value=""></option>
-                                <option value="Mca">MCA</option>
-                                <option value="Msc">MSC</option>
+                                <option value="MCA">MCA</option>
+                                <option value="MSC">MSC</option>
                                
                             </select>
           <!--  {{#if errors.usertype}}
@@ -57,14 +57,13 @@
 
 
 <!--button-->
-<button  class="button" type="submit">Next</button>
+ <button type="submit">Next</button>
 
 
 </form>
             </div>
         </div>
     </div>
-
     
     
 </body>

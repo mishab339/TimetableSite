@@ -97,7 +97,7 @@
 
 <body>
     <div class="form-container">
-        <h2>Timetable Form</h2>
+        <h2>Edit Timetable</h2>
 
         <hr>
         {{#if errors.day}}
@@ -105,7 +105,7 @@
             {{/if}}
         <p>Course:{{course}}</p>
         <p>Semester:{{semester}} </p>
-        <form id="timetableForm" action="/save-timetable" method="post">
+        <form id="timetableForm" action="/saveeditedtimetable" method="post">
             <table>
                 <thead>
                     <tr>
@@ -120,17 +120,10 @@
                     <!-- Row for the Day -->
                     <tr>
                         <td rowspan="5">
-                            <select id="day" name="day" >
-                                <option value="">Select Day</option>
-                                <option value="Monday">Monday</option>
-                                <option value="Tuesday">Tuesday</option>
-                                <option value="Wednesday">Wednesday</option>
-                                <option value="Thursday">Thursday</option>
-                                <option value="Friday">Friday</option>
-                            </select>
+                            <input type="text" name="day" placeholder="{{data.day}}" >
                         </td>
                         <!-- First Row for Subject -->
-                        <td><input type="text" name="subject1" placeholder="Enter Subject" ></td>
+                        <td><input type="text" name="subject1" value="{{data.firstPeriod.0.subject}}" ></td>
                         <td><input type="time" name="startTime1" ></td>
                         <td><input type="time" name="endTime1" ></td>
                         <td><input type="text" name="tutor1" placeholder="Enter Tutor Name" ></td>

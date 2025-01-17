@@ -13,11 +13,16 @@ router.get('/studentprofile', siteControllers.studentProfile);
 router.get('/facultyProfile', siteControllers.facultyProfile);
 router.get('/viewStudTimetable', siteControllers.viewStudTimetable);
 router.get('/viewFacTimetable', siteControllers.viewFacTimetable);
-router.get('/editeTimeTable', siteControllers.editeTimetable);
-router.get('/classSelect', siteControllers.classSelect);
 router.get('/logout', siteControllers.logout);
 router.get('/timeTable', siteControllers.timetable);
-router.get('/edit-timetable',siteControllers.editTimeTable)
+router.get('/selectClass', siteControllers.selectClass);
+router.post('/addTimeTable', siteControllers.addtimetable);
+router.get('/addTimeTable', siteControllers.getTimeTable);
+router.get('/edit-timetable/:id', siteControllers.editTimeTable);
+
+
+
+//router.get('/edit-timetable',siteControllers.editTimeTable)
 
 
 router.post('/login', siteControllers.login_validation);
@@ -25,9 +30,10 @@ router.post('/role', siteControllers.signup);
 router.post('/studentsignup', siteControllers.studentSignup_validation);
 router.post('/facultysignup', siteControllers.facultySignup_validation);
 router.post('/save-timetable',siteControllers.saveTimeTable);
-router.post('/get-timeTable',siteControllers.getTimeTable);
+router.post('/displayTimeTable',siteControllers.displayTimeTable);
 //router.get('/view-time-table',siteControllers.viewTimeTable)
 //router.post('/submitClassSelected',siteControllers.submitClassSelected)
+
 
 
   

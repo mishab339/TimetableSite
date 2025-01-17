@@ -1,8 +1,16 @@
 require('../models/database');
 const studentCollection = require('../models/studentUser');
 const facultyCollection = require('../models/facultyUser');
-const timeTableCollection = require("../models/timetable");
+// Import collections
+const { mcaS1collection, mcaS3collection,mcaS4collection,mscS1collection, mcaS2collection, mscS2collection ,mscS3collection ,mscS4collection } = require('../models/timetable');
 
+// Dynamic collection mapping
+const collectionMapping = {
+    "MCA-S1": mcaS1collection,
+    "MSC-S1": mscS1collection,
+    "MCA-S2": mcaS2collection,
+    "MSC-S2": mscS2collection
+};
 module.exports = {
     login: async(req,res)=>{
         res.render("login", { errors: {}, username: "" });
@@ -403,9 +411,15 @@ module.exports = {
          
           },
           saveTimeTable:async(req,res)=>{
-            const { subject1 } = req.body; 
-        
-            const data = {
+            const errors = {};
+           const { action } = req.body;
+           // console.log(action);
+            try{
+              if (action === "save") {
+
+
+           // const { course, semester, timetable } = req.body;       
+               const data = {
                day:req.body.day,
                'firstPeriod.0.subject':req.body.subject1,
                'firstPeriod.0.startingTime':req.body.startTime1,
@@ -428,17 +442,65 @@ module.exports = {
                'fifthPeriod.0.endingTime':req.body.endTime5,
                'fifthPeriod.0.tutor':req.body.tutor5
             }
-            console.log(data);
-            await timeTableCollection.insertMany([data]);
-          },
-          editTimeTable:async(req,res)=>{
-             res.render("editeTimeTable")
-          },
-          getTimeTable:async(req,res)=>{
-            const { course,semester } = req.body; 
+            //console.log(data);
+            const course=req.session.course;
+            const semester=req.session.semester;
             console.log(course);
             console.log(semester);
-            
+            if (course=="MCA"&& semester == "S1"){
+              const day=data.day;
+              const existingDay = await mcaS1collection.findOne({ day});
+              if (existingDay) {
+                errors.day = "Day already exit.";
+                res.render("addTimetable",{errors,course,semester})
+              }
+              await mcaS1collection.insertMany([data]);
+
+            }else if(course=='MCA'&&semester == "S2"){
+              const day=data.day;
+              const existingDay = await mcaS1collection.findOne({ day});
+              if (existingDay) {
+                errors.day = "Day already exit.";
+                res.render("addTimetable",{errors,course,semester})
+              }
+              await mcaS2collection.insertMany([data]);
+            }else if(course == "MSC" && semester == "S1"){
+              const day=data.day;
+              const existingDay = await mcaS1collection.findOne({ day});
+              if (existingDay) {
+                errors.day = "Day already exit.";
+                res.render("addTimetable",{errors,course,semester})
+              }
+              await mscS1collection.insertMany([data]);
+            }else{
+              const day=data.day;
+              const existingDay = await mcaS1collection.findOne({ day});
+              if (existingDay) {
+                errors.day = "Day already exit.";
+                res.render("addTimetable",{errors,course,semester})
+              }
+              await mscS2collection.insertMany([data]);
+            }
+             res.render("addTimetable",{course,semester})
+
+          }
+          else{
+            res.render('hodHome')
+          }
+          }
+          
+          catch(err){
+            console.log(err);
+          }
+          },
+
+
+          
+          getTimeTable:async(req,res)=>{
+            const course=req.session.course;
+            const semester=req.session.semester;
+             res.render('addTimetable',{course,semester})
+           
           },
           viewTimeTable:async(req,res)=>{
             //const data = req.body;  // Store the entire request body
@@ -464,19 +526,67 @@ module.exports = {
             return res.redirect('/login'); // Redirect to the login page
            });
           },
-          editeTimetable:async(req,res)=>{
-            return res.render('editeTimeTable'); 
+
+
+          //set
+          
+          addtimetable:async(req,res)=>{
+            const  { course, semester } = req.body;
+            console.log(req.body)
+            req.session.course = course;
+            req.session.semester = semester;
+            console.log(req.session)
+           
+           res.render('addTimetable',{course,semester}); 
           },
-          classSelect:async(req,res)=>{
+
+
+//set
+
+
+          selectClass:async(req,res)=>{
             return res.render('classSelect'); 
           },
+          //set
+
           timetable:async(req,res)=>{
-            const data = await timeTableCollection.find();
-            for(let i = 0;i<5;i++){
-              console.log(data[i])
+            res.render('timeTable'); 
+          },
+
+
+          displayTimeTable:async(req,res)=>{
+
+            console.log(req.body);
+           const course=req.body.course;
+           const semester=req.body.semester;
+           req.session.course =course;
+           req.session.semester = semester;
+           //console.log(req.session.course)
+
+           if (course=="MCA" && semester=="S1"){
+            const s1data=  await mcaS1collection.find();
+            console.log(s1data);
+            res.render("timeTable",{data:s1data,course,semester});
+
+           }
+
+           
+            
+           
+          },
+
+          editTimeTable:async(req,res)=>{
+            console.log(req.params);
+            const course=req.session.course;
+            const semester=req.session.semester;
+            console.log(course);
+            if (course=="MCA"&& semester == "S1"){
+              const timetable= await mcaS1collection.findOne({_id:req.params.id});
+              console.log(timetable);
+              res.render("editTimeTable",{course,semester,data:timetable})
             }
-            res.render('timeTable',{data:data}); 
-          }
+         },
+
         
 
 

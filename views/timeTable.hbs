@@ -100,14 +100,14 @@
 </head>
 
 <body>
-    <h1>Edit Timetable</h1>
-    <form action="/get-timeTable" method="post">
+    <h1>{{course}} {{semester}} Timetable</h1>
+    <form action="/displayTimeTable" method="post">
     <div class="selection-container">
         <label for="course">Select Course:</label>
         <select name="course" id="course">
             <option value="">--Select Course--</option>
-            <option   value="Mca">MCA</option>
-            <option value="Msc">MSC</option>
+            <option   value="MCA">MCA</option>
+            <option value="MSC">MSC</option>
         </select>
         <label for="semester">Select Semester:</label>
         <select name="semester" id="semester">
