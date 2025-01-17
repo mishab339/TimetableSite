@@ -2,7 +2,7 @@ require('../models/database');
 const studentCollection = require('../models/studentUser');
 const facultyCollection = require('../models/facultyUser');
 // Import collections
-const { mcaS1collection, mcaS3collection,mcaS4collection,mscS1collection, mcaS2collection, mscS2collection ,mscS3collection ,mscS4collection } = require('../models/timetable');
+const { mcaS1collection, mscS1collection, mcaS2collection, mscS2collection } = require('../models/timetable');
 
 // Dynamic collection mapping
 const collectionMapping = {
@@ -457,28 +457,13 @@ module.exports = {
               await mcaS1collection.insertMany([data]);
 
             }else if(course=='MCA'&&semester == "S2"){
-              const day=data.day;
-              const existingDay = await mcaS1collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
+              
               await mcaS2collection.insertMany([data]);
             }else if(course == "MSC" && semester == "S1"){
-              const day=data.day;
-              const existingDay = await mcaS1collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
+              
               await mscS1collection.insertMany([data]);
             }else{
-              const day=data.day;
-              const existingDay = await mcaS1collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
+             
               await mscS2collection.insertMany([data]);
             }
              res.render("addTimetable",{course,semester})

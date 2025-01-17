@@ -174,25 +174,9 @@
         </form>
     </div>
 
-    <script>
+   <!-- <script>
 
-            // Retrieve course and semester from sessionStorage and display them
-            document.addEventListener("DOMContentLoaded", () => {
-                const course = sessionStorage.getItem("selectedCourse");
-                const semester = sessionStorage.getItem("selectedSemester");
-
-                // Display the course and semester
-                if (course && semester) {
-                    document.getElementById("course-display").textContent = `Course: ${course}`;
-                    document.getElementById("semester-display").textContent = `Semester: ${semester}`;
-                } else {
-                    // Handle case if data is missing (e.g., user navigated directly to this page)
-                    alert("Course and Semester not selected! Redirecting...");
-                    window.location.href = "/"; // Redirect to the selection page
-                }
-            });
-
-
+           
         function saveTimetable() {
             const form = document.getElementById('timetableForm');
             const formData = new FormData(form);
@@ -221,7 +205,7 @@
                     alert('Failed to save timetable.');
                 });
         }
-    </script>  
+    </script>  -->
 </body>
 
 </html>
