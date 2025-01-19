@@ -1004,5 +1004,51 @@ module.exports = {
           const timetables = await getAllTimetables(course,semester);
           console.log(timetables);
           res.render("AllTimeTableForFaculty",{data:timetables})
+         },
+         deleteStudent:async(req,res)=>{
+          const id = req.params.id;
+          await studentCollection.deleteOne({_id:id});
+          res.redirect("/student-details");
+          console.log(req.params);
+         },
+         deleteFaculty:async(req,res)=>{
+          const id = req.params.id;
+          await facultyCollection.deleteOne({_id:id});
+          res.redirect("/faculty-details")
+         },
+         editStudentDetails:async(req,res)=>{
+          const id = req.params.id;
+          const result = await studentCollection.findOne({_id:id});
+          console.log(result)
+          res.render("editStudendDetails",{data:result})
+         },
+         saveEditedStudentDetails:async(req,res)=>{
+          console.log(req.body)
+          console.log(req.params)
+          const id = req.params.id
+          const result = await studentCollection.updateOne({_id:id},{$set:{
+            name:req.body.name,
+            email:req.body.email,
+            phone:req.body.phone,
+            course:req.body.course,
+            semester:req.body.semester
+          }})
+          res.redirect("/student-details")
+         },
+         editFaculty:async(req,res)=>{
+          const id = req.params.id
+          const result = await facultyCollection.findOne({_id:id})
+          res.render("editfacultyDetials",{data:result});
+         },
+         saveEditedFacultyDetails:async(req,res)=>{
+          const id = req.params.id
+          const result = await facultyCollection.updateOne({_id:id},{$set:{
+             name:req.body.name,
+             email:req.body.email,
+             phone:req.body.phone
+          }
+          })
+          console.log(result);
+          res.redirect("/faculty-details")
          }
 }

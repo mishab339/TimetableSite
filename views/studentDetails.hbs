@@ -39,9 +39,17 @@
       background-color: #4CAF50;
       color: white;
     }
+    .edit-btn a{
+      text-decoration: none;
+      color: #fff;
+    }
     .delete-btn {
       background-color: #f44336;
       color: white;
+    }
+    .delete-btn a{
+      text-decoration: none;
+      color: #fff;
     }
   </style>
 </head>
@@ -73,8 +81,8 @@
         <td>{{semester}}</td>
         <td>
           <div class="action-buttons">
-            <button class="edit-btn">Edit</button>
-            <button class="delete-btn">Delete</button>
+            <button class="edit-btn"><a href="/edit-student-details/{{this._id}}">Edit</a></button>
+            <button class="delete-btn"><a href="/delete-student/{{this._id}}" onclick="return confirm('Are you sure to delete {{this.name}}?')">Delete</a></button>
           </div>
         </td>
       </tr>
