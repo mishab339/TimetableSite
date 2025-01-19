@@ -16,9 +16,12 @@ router.get('/viewFacTimetable', siteControllers.viewFacTimetable);
 router.get('/logout', siteControllers.logout);
 router.get('/timeTable', siteControllers.timetable);
 router.get('/selectClass', siteControllers.selectClass);
-
+router.get('/show-all-day-timetable-student',siteControllers.showAllDayTimeTableForStudent)
 router.get('/addTimeTable', siteControllers.getTimeTable);
 router.get('/edit-timetable/:id', siteControllers.editTimeTable);
+router.get('/sudent-details',siteControllers.studentDetails);
+router.get('/faculty-details',siteControllers.facultyDetails)
+router.get("/all-timetables-for-faculty",siteControllers.getAlldayTimeTable)
 
 
 
@@ -33,6 +36,7 @@ router.post('/save-timetable',siteControllers.saveTimeTable);
 router.post('/displayTimeTable',siteControllers.displayTimeTable);
 router.post('/addTimeTable', siteControllers.addtimetable);
 router.post('/saveeditedtimetable/:id',siteControllers.saveEditedTimetable)
+router.post("/show-all-time-table-for-faculty",siteControllers.postAlldayTimeTable)
 //router.get('/view-time-table',siteControllers.viewTimeTable)
 //router.post('/submitClassSelected',siteControllers.submitClassSelected)
 
