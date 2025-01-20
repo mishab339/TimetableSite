@@ -1,12 +1,14 @@
 require('../models/database');
+require("../utils/findScheduleForMsg");
+require("../utils/sendingPeriodRemainders");
 const studentCollection = require('../models/studentUser');
 const facultyCollection = require('../models/facultyUser');
 // Import collections
 const { mcaS1collection,mcaS2collection,mcaS3collection,mcaS4collection,
   mscS1collection,mscS2collection,mscS3collection,mscS4collection 
 } = require('../models/timetable');
-const {getTimetablesForTutor,getAllTimetables} = require("../utils/filterFacultyTimeTable")
-const { default: mongoose } = require('mongoose');
+const {getTimetablesForTutor,getAllTimetables} = require("../utils/filterFacultyTimeTable");
+
 
 // Dynamic collection mapping
 const collectionMapping = {
@@ -510,8 +512,8 @@ module.exports = {
             const d = new Date();
             let day = days[d.getDay()];
             const currentDay = "Monday";
-            // const facultyId = '678b7b15ba4374282dc534ed';
-            const facultyId = req.session.facultyId;
+            const facultyId = '678b7b15ba4374282dc534ed';
+            // const facultyId = req.session.facultyId;
             const facultyName = await facultyCollection.findOne({_id:facultyId},{name:1});
             console.log(facultyName.name);
             const timetables = await getTimetablesForTutor(currentDay, facultyName.name);
@@ -1052,3 +1054,5 @@ module.exports = {
           res.redirect("/faculty-details")
          }
 }
+
+
