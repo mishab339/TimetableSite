@@ -190,5 +190,48 @@ module.exports={
       console.error("Error fetching timetable:", error);
     }
 
+  },
+  addTimeTable:async({course,semester,data},res)=>{
+    try {
+      const collectionName = `${course} ${semester}`;
+      const collection = collectionsforFetchingAllTimeTable[collectionName];
+      if (!collection) {
+        console.error("Invalid course or semester");
+        return;
+      }
+      const dataforAdd = {
+        day:data.day,
+        'firstPeriod.0.subject':data.subject1,
+        'firstPeriod.0.startingTime':data.startTime1,
+        'firstPeriod.0.endingTime':data.endTime1,
+        'firstPeriod.0.tutor':data.tutor1,
+        'secondPeriod.0.subject':data.subject2,
+        'secondPeriod.0.startingTime':data.startTime2,
+        'secondPeriod.0.endingTime':data.endTime2,
+        'secondPeriod.0.tutor':data.tutor2,
+        'thirdPeriod.0.subject':data.subject3,
+        'thirdPeriod.0.startingTime':data.startTime3,
+        'thirdPeriod.0.endingTime':data.endTime3,
+        'thirdPeriod.0.tutor':data.tutor3,
+        'fourthPeriod.0.subject':data.subject4,
+        'fourthPeriod.0.startingTime':data.startTime4,
+        'fourthPeriod.0.endingTime':data.endTime4,
+        'fourthPeriod.0.tutor':data.tutor4,
+        'fifthPeriod.0.subject':data.subject5,
+        'fifthPeriod.0.startingTime':data.startTime5,
+        'fifthPeriod.0.endingTime':data.endTime5,
+        'fifthPeriod.0.tutor':data.tutor5
+     }
+     const day = data.day;
+     const existingDay = await collection.findOne({day:day}).lean();
+     if(existingDay){
+      return false;
+     }else{
+      const result = await collection.insertMany([dataforAdd]);
+      return result;
+     }
+    } catch (error) {
+      console.log(error)
+    }
   }
 }

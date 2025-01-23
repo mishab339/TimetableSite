@@ -7,7 +7,7 @@ const facultyCollection = require('../models/facultyUser');
 const { mcaS1collection,mcaS2collection,mcaS3collection,mcaS4collection,
   mscS1collection,mscS2collection,mscS3collection,mscS4collection 
 } = require('../models/timetable');
-const {getTimetablesForTutor,getAllTimetables,currentDayTimeTable,getStudentEmail,getAllStudentEmail,getAllTimetablesForHOD,getTimeTableByeId,editAndUpdatedTable} = require("../utils/filterFacultyTimeTable");
+const {getTimetablesForTutor,getAllTimetables,currentDayTimeTable,getStudentEmail,getAllStudentEmail,getAllTimetablesForHOD,getTimeTableByeId,editAndUpdatedTable,addTimeTable} = require("../utils/filterFacultyTimeTable");
 const {sendInfoEmail,sendInfoEmailToAll} = require("../utils/sendingEmails");
 const { get } = require('mongoose');
 
@@ -341,7 +341,7 @@ module.exports = {
               if (!name) {
                   return res.redirect('/login'); // Redirect to login if session is not set
               }
-              res.render('studentHome', { name }); // Pass the name to the view
+              res.render('studentHome', { name,usermode:req.session}); // Pass the name to the view
           },
 
           facultyHome: async (req, res) => {
@@ -350,7 +350,7 @@ module.exports = {
             if (!name) {
                 return res.redirect('/login'); // Redirect to login if session is not set
             }
-            res.render('facultyHome', { name }); // Pass the name to the view
+            res.render('facultyHome', { name ,usermode:req.session}); // Pass the name to the view
         },
         hodHome: async (req, res) => {
           const name = req.session.name;
@@ -358,7 +358,7 @@ module.exports = {
           if (!name) {
               return res.redirect('/login'); // Redirect to login if session is not set
           }
-          res.render('hodHome', { name }); // Pass the name to the view
+          res.render('hodHome', { name ,usermode:req.session}); // Pass the name to the view
       },
  
           studentProfile:async(req,res)=>{
@@ -380,6 +380,7 @@ module.exports = {
                   phone: user.phone,
                   course:user.course,
                   semester:user.semester,
+                  usermode:req.session
                   
                   // Add other user data you want to pass
               });
@@ -407,6 +408,7 @@ module.exports = {
                   email: user.email,
                   phone: user.phone,
                   usertype:user.usertype,
+                  usermode:req.session
                   
                   // Add other user data you want to pass
               });
@@ -427,7 +429,7 @@ module.exports = {
           const course = studentData.course
           const semester = studentData.semester
           const timetable =await currentDayTimeTable(course,semester,day);
-          res.render('viewStudTimetable',{data:timetable[0]});
+          res.render('viewStudTimetable',{data:timetable[0],usermode:req.session});
           },
           showAllDayTimeTableForStudent:async(req,res)=>{
             const studentId = req.session.studentId
@@ -435,17 +437,17 @@ module.exports = {
             const course = studentData.course
             const semester = studentData.semester
             const timetable = await getAllTimetables(course,semester);
-            res.render('showAllDayTimeTable',{data:timetable.timetable});
+            res.render('showAllDayTimeTable',{data:timetable.timetable,usermode:req.session});
           },
           studentDetails:async(req,res)=>{
               const data = await studentCollection.find().lean();
               console.log(data)
-              res.render('studentDetails',{data:data});
+              res.render('studentDetails',{data:data,usermode:req.session});
           },
           facultyDetails:async(req,res)=>{
               const data = await facultyCollection.find().lean();
               console.log(data);
-              res.render('facultyDetails',{data})
+              res.render('facultyDetails',{data,usermode:req.session})
           },
           viewFacTimetable:async(req,res)=>{
             const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -459,120 +461,27 @@ module.exports = {
             console.log(facultyName.name);
             const timetables = await getTimetablesForTutor(currentDay, facultyName.name);
             console.log(timetables)
-            res.render('viewFacTimetable',{data:timetables,day:currentDay,tutor:facultyName.name});
+            res.render('viewFacTimetable',{data:timetables,day:currentDay,tutor:facultyName.name,usermode:req.session});
           },
           saveTimeTable:async(req,res)=>{
             const errors = {};
            const { action } = req.body;
-           // console.log(action);
             try{
               if (action === "save") {
-
-
-           // const { course, semester, timetable } = req.body;       
-               const data = {
-               day:req.body.day,
-               'firstPeriod.0.subject':req.body.subject1,
-               'firstPeriod.0.startingTime':req.body.startTime1,
-               'firstPeriod.0.endingTime':req.body.endTime1,
-               'firstPeriod.0.tutor':req.body.tutor1,
-               'secondPeriod.0.subject':req.body.subject2,
-               'secondPeriod.0.startingTime':req.body.startTime2,
-               'secondPeriod.0.endingTime':req.body.endTime2,
-               'secondPeriod.0.tutor':req.body.tutor2,
-               'thirdPeriod.0.subject':req.body.subject3,
-               'thirdPeriod.0.startingTime':req.body.startTime3,
-               'thirdPeriod.0.endingTime':req.body.endTime3,
-               'thirdPeriod.0.tutor':req.body.tutor3,
-               'fourthPeriod.0.subject':req.body.subject4,
-               'fourthPeriod.0.startingTime':req.body.startTime4,
-               'fourthPeriod.0.endingTime':req.body.endTime4,
-               'fourthPeriod.0.tutor':req.body.tutor4,
-               'fifthPeriod.0.subject':req.body.subject5,
-               'fifthPeriod.0.startingTime':req.body.startTime5,
-               'fifthPeriod.0.endingTime':req.body.endTime5,
-               'fifthPeriod.0.tutor':req.body.tutor5
+                   const course=req.session.course;
+                   const semester=req.session.semester;
+                   const data = req.body
+                   const result = await addTimeTable({course,semester,data},res);
+                   if(result){
+                    res.render("addTimetable",{course,semester,usermode:req.session})
+                   }else{
+                    errors.day = "Day already exit.";
+                    res.render("addTimetable",{errors,course,semester,usermode:req.session});
+                   }
+            }else{
+              res.render('hodHome',{usermode:req.session});
             }
-            //console.log(data);
-            const course=req.session.course;
-            const semester=req.session.semester;
-            console.log(course);
-            console.log(semester);
-            if (course=="MCA"&& semester == "S1"){
-              const day=data.day;
-              const existingDay = await mcaS1collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
-              await mcaS1collection.insertMany([data]);
-            }else if(course=='MCA'&&semester == "S2"){
-              const day=data.day;
-              const existingDay = await mcaS2collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
-              await mcaS2collection.insertMany([data]);
-            }else if(course=='MCA'&&semester == "S3"){
-              const day=data.day;
-              const existingDay = await mcaS3collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
-              await mcaS3collection.insertMany([data]);
-            }else if(course=='MCA'&&semester == "S4"){
-              const day=data.day;
-              const existingDay = await mcaS4collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
-              await mcaS4collection.insertMany([data]);
-            }else if(course=='MSC'&&semester == "S1"){
-              const day=data.day;
-              const existingDay = await mscS1collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
-              await mscS1collection.insertMany([data]);
-            }
-            else if(course == "MSC" && semester == "S2"){
-              const day=data.day;
-              const existingDay = await mscS2collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
-              await mscS2collection.insertMany([data]);
-            
-            }else if(course == "MSC" && semester == "S3"){
-              const day=data.day;
-              const existingDay = await mscS3collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
-              await mscS3collection.insertMany([data]);
-            
-            }else if(course == "MSC" && semester == "S4"){
-              const day=data.day;
-              const existingDay = await mscS4collection.findOne({ day});
-              if (existingDay) {
-                errors.day = "Day already exit.";
-                res.render("addTimetable",{errors,course,semester})
-              }
-              await mscS4collection.insertMany([data]);
-            }
-             res.render("addTimetable",{course,semester})
           }
-          else{
-            res.render('hodHome')
-          }
-          }
-          
           catch(err){
             console.log(err);
           }
@@ -583,7 +492,7 @@ module.exports = {
           getTimeTable:async(req,res)=>{
             const course=req.session.course;
             const semester=req.session.semester;
-             res.render('addTimetable',{course,semester})
+             res.render('addTimetable',{course,semester,usermode:req.session})
            
           },
           viewTimeTable:async(req,res)=>{
@@ -622,7 +531,7 @@ module.exports = {
             console.log(req.session)
             const tutors = await facultyCollection.find({},{name:1}).lean();
             console.log(tutors);
-           res.render('addTimetable',{course,semester,tutors}); 
+           res.render('addTimetable',{course,semester,tutors,usermode:req.session}); 
           },
 
 
@@ -630,12 +539,12 @@ module.exports = {
 
 
           selectClass:async(req,res)=>{
-            return res.render('classSelect'); 
+            return res.render('classSelect',{usermode:req.session}); 
           },
           //set
 
           timetable:async(req,res)=>{
-            res.render('timeTable'); 
+            res.render('timeTable',{usermode:req.session}); 
           },
 
 
@@ -646,14 +555,14 @@ module.exports = {
            req.session.semester = semester;
           //  console.log(req.session.course)
             const result = await getAllTimetablesForHOD(course,semester);
-            res.render("timeTable",{data:result,course,semester});
+            res.render("timeTable",{data:result,course,semester,usermode:req.session});
           },
           editTimeTable:async(req,res)=>{
             const id = req.params.id;
             const course=req.session.course;
             const semester=req.session.semester;
             const result = await getTimeTableByeId({course,semester,id},res);
-            res.render("editTimeTable",{course,semester,data:result})
+            res.render("editTimeTable",{course,semester,data:result,usermode:req.session})
          },
          saveEditedTimetable:async(req,res)=>{
            const id = req.params.id
@@ -663,10 +572,10 @@ module.exports = {
            const result = await editAndUpdatedTable({course,semester,id,data},res);
            const updatedData = await getAllTimetablesForHOD(course,semester);
            console.log(updatedData);
-           res.render("timeTable",{data:updatedData,course:req.session.course,semester:req.session.semester});
+           res.render("timeTable",{data:updatedData,course:req.session.course,semester:req.session.semester,usermode:req.session});
          },
          getAlldayTimeTable:async (req,res)=>{
-            res.render("AllTimeTableForFaculty")
+            res.render("AllTimeTableForFaculty",{usermode:req.session})
          },
          postAlldayTimeTable:async (req,res)=>{
           const course = req.body.course
@@ -674,7 +583,7 @@ module.exports = {
           console.log(course,semester)
           const timetables = await getAllTimetables(course,semester);
           console.log(timetables);
-          res.render("AllTimeTableForFaculty",{data:timetables})
+          res.render("AllTimeTableForFaculty",{data:timetables,usermode:req.session})
          },
          deleteStudent:async(req,res)=>{
           const id = req.params.id;
@@ -691,7 +600,7 @@ module.exports = {
           const id = req.params.id;
           const result = await studentCollection.findOne({_id:id}).lean();
           console.log(result)
-          res.render("editStudendDetails",{data:result})
+          res.render("editStudendDetails",{data:result,usermode:req.session})
          },
          saveEditedStudentDetails:async(req,res)=>{
           console.log(req.body)
@@ -709,7 +618,7 @@ module.exports = {
          editFaculty:async(req,res)=>{
           const id = req.params.id
           const result = await facultyCollection.findOne({_id:id}).lean();
-          res.render("editfacultyDetials",{data:result});
+          res.render("editfacultyDetials",{data:result,usermode:req.session});
          },
          saveEditedFacultyDetails:async(req,res)=>{
           const id = req.params.id
@@ -723,7 +632,7 @@ module.exports = {
           res.redirect("/faculty-details")
          },
          sendInformations:async (req,res)=>{
-          res.render("sendMail")
+          res.render("sendMail",{usermode:req.session})
          },
          sendinginformationMail:async (req,res)=>{
           console.log(req.body);
