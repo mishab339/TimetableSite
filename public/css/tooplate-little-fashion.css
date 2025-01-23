@@ -263,6 +263,9 @@ strong {
 .custom-icon {
   display: inline-block;
   vertical-align: middle;
+  position: absolute;
+  top: 45px;
+  right: 10px;
 }
 
 .bi-bag.custom-icon {
