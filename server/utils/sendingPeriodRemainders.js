@@ -22,13 +22,11 @@ const twilioClient = twilio(accountSid, authToken);
       }
      async function sendReminders(){
         const students = await Student.find();
-        console.log(students);
         const now = new Date();
         const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now
           .getMinutes()
           .toString()
           .padStart(2, '0')}`;
-           console.log(currentTime)
         for (const student of students) {
           for (const period of student.schedule) {
             if (period.startingTime === currentTime) {

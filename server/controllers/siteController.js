@@ -7,7 +7,9 @@ const facultyCollection = require('../models/facultyUser');
 const { mcaS1collection,mcaS2collection,mcaS3collection,mcaS4collection,
   mscS1collection,mscS2collection,mscS3collection,mscS4collection 
 } = require('../models/timetable');
-const {getTimetablesForTutor,getAllTimetables} = require("../utils/filterFacultyTimeTable");
+const {getTimetablesForTutor,getAllTimetables,currentDayTimeTable,getStudentEmail,getAllStudentEmail,getAllTimetablesForHOD,getTimeTableByeId,editAndUpdatedTable} = require("../utils/filterFacultyTimeTable");
+const {sendInfoEmail,sendInfoEmailToAll} = require("../utils/sendingEmails");
+const { get } = require('mongoose');
 
 
 // Dynamic collection mapping
@@ -18,8 +20,12 @@ const collectionMapping = {
     "MSC-S2": mscS2collection
 };
 module.exports = {
+    Home:async(req,res)=>{
+      res.render("index",{usermode:req.session});
+    },
     login: async(req,res)=>{
         res.render("login", { errors: {}, username: "" });
+       
     },
     role:async(req,res)=>{
         res.render('role')
@@ -112,7 +118,7 @@ module.exports = {
             await studentCollection.insertMany([data]);
 
             // Redirect to welcome page
-            res.render("welcomeSignup", { name: data.name });
+            res.render("login", { name: data.name });
         } catch (error) {
           
             console.error("Error during signup:", error);
@@ -184,7 +190,7 @@ module.exports = {
                   await facultyCollection.insertMany([data]);
       
                   // Redirect to welcome page
-                  res.render("welcomeSignup", { name: data.name });
+                  res.redirect("/login");
               } catch (error) {
                   console.error("Error during signup:", error);
                   res.send("Error during signup. Please try again.");
@@ -197,9 +203,9 @@ module.exports = {
 
 
       login_validation: async(req,res)=>{
-                const { username, password, yeartype,usertype } = req.body;
+                const { username, password,usertype } = req.body;
                 const errors = {};
-              
+                console.log(req.body);
                 // Validate input fields
                 if (!username) {
                   errors.username = "*Username is required.";
@@ -207,19 +213,16 @@ module.exports = {
                 if (!password) {
                   errors.password = "*Password is required.";
                 }
-                if (!yeartype) {
-                  errors.yeartype = "*yeartype is required.";
-                }
                 if (!usertype) {
                   errors.usertype = "*Role is required.";
                 }
               
                 // If there are validation errors, re-render the login page with error messages
                 if (Object.keys(errors).length > 0) {
+                  
                   return res.render("login", { errors, username });
                 }
                 if(usertype==='Student'){
-              
                 try {
                   const user = await studentCollection.findOne({ username });
                   req.session.studentId = user._id;
@@ -244,12 +247,12 @@ module.exports = {
                   req.session.username = user.username;
                   req.session.name = user.name;
                   req.session.usertype = user.usertype;
-
-                  
+                  req.session.isStudent = true
+                  req.session.isLogin=true
                   // Redirect to home page and pass the username
-              
-                  
-                    res.render('studentHome',{ name: user.name });
+                
+                    console.log(req.session)  
+                    res.render('index',{ name: user.name,usermode:req.session});
                  
                                
                 } 
@@ -281,10 +284,12 @@ module.exports = {
                   // Store user info in session
                   req.session.username = user.username;
                   req.session.name = user.name;
-                  req.session.usertype = user.usertype;         
+                  req.session.usertype = user.usertype;
+                  req.session.isFaculty = true  
+                  req.session.isLogin=true
+                  console.log(req.session);       
                   // Redirect to home page and pass the username          
-                  
-                   res.render('facultyHome',{ name: user.name });                                               
+                   res.render('index',{ name: user.name,usermode:req.session});                                               
                 } 
                 catch (error) {
                   console.error("Error during login:", error);
@@ -313,10 +318,13 @@ module.exports = {
                   // Store user info in session
                   req.session.username = user.username;
                   req.session.name = user.name;
-                  req.session.usertype = user.usertype;         
+                  req.session.usertype = user.usertype;  
+                  req.session.isHOD = true  
+                  req.session.isLogin=true  
+                  console.log(req.session)   
                   // Redirect to home page and pass the username          
                   
-                   res.render('hodHome',{ name: user.name });                                               
+                   res.render('index',{ name: user.name,usermode:req.session});                                               
                 } 
                 catch (error) {
                   console.error("Error during login:", error);
@@ -418,92 +426,24 @@ module.exports = {
           const studentData = await studentCollection.findOne({_id:studentId},{course:1,semester:1})
           const course = studentData.course
           const semester = studentData.semester
-          console.log(course," ", semester);
-          console.log(studentData);
-          if(course=="MCA"&&semester=="S1"){
-            const timetable = await mcaS1collection.findOne({day:day});
-            console.log(timetable)
-            res.render('viewStudTimetable',{data:timetable});
-          }else if(course=="MCA"&&semester=="S2"){
-            const timetable = await mcaS2collection.findOne({day:day});
-            console.log(timetable)
-            res.render('viewStudTimetable',{data:timetable});
-          }else if(course=="MCA"&&semester=="S3"){
-            const timetable = await mcaS3collection.findOne({day:day});
-            console.log(timetable)
-            res.render('viewStudTimetable',{data:timetable});
-          }else if(course=="MCA"&&semester=="S4"){
-            const timetable = await mcaS4collection.findOne({day:day});
-            console.log(timetable)
-            res.render('viewStudTimetable',{data:timetable});
-          }else if(course=="MSC"&&semester=="S1"){
-            const timetable = await mscS1collection.findOne({day:day});
-            console.log(timetable)
-            res.render('viewStudTimetable',{data:timetable});
-          }else if(course=="MSC"&&semester=="S2"){
-            const timetable = await mscS2collection.findOne({day:day});
-            console.log(timetable)
-            res.render('viewStudTimetable',{data:timetable});
-          }else if(course=="MSC"&&semester=="S3"){
-            const timetable = await mcaS3collection.findOne({day:day});
-            console.log(timetable)
-            res.render('viewStudTimetable',{data:timetable});
-          }else if(course=="MSC"&&semester=="S4"){
-            const timetable = await mscS4collection.findOne({day:day});
-            console.log(timetable)
-            res.render('viewStudTimetable',{data:timetable});
-          }
+          const timetable =await currentDayTimeTable(course,semester,day);
+          res.render('viewStudTimetable',{data:timetable[0]});
           },
           showAllDayTimeTableForStudent:async(req,res)=>{
             const studentId = req.session.studentId
             const studentData = await studentCollection.findOne({_id:studentId},{course:1,semester:1})
-            console.log(studentData);
             const course = studentData.course
             const semester = studentData.semester
-            console.log(studentId);
-            console.log(studentData);
-            console.log(course," ",semester);
-            if(course=="MCA"&&semester=="S1"){
-              const timetable = await mcaS1collection.find();
-              console.log(typeof(timetable));
-              res.render('showAllDayTimeTable',{data:timetable});
-            }else if(course=="MCA"&&semester=="S2"){
-              const timetable = await mcaS2collection.find();
-              console.log(timetable)
-              res.render('showAllDayTimeTable',{data:timetable});
-            }else if(course=="MCA"&&semester=="S3"){
-              const timetable = await mcaS3collection.find();
-              console.log(timetable)
-              res.render('showAllDayTimeTable',{data:timetable});
-            }else if(course=="MCA"&&semester=="S4"){
-              const timetable = await mcaS4collection.find();
-              console.log(timetable)
-              res.render('showAllDayTimeTable',{data:timetable});
-            }else if(course=="MSC"&&semester=="S1"){
-              const timetable = await mscS1collection.find();
-              console.log(timetable)
-              res.render('showAllDayTimeTable',{data:timetable});
-            }else if(course=="MSC"&&semester=="S2"){
-              const timetable = await mscS2collection.find();
-              console.log(timetable)
-              res.render('showAllDayTimeTable',{data:timetable});
-            }else if(course=="MSC"&&semester=="S3"){
-              const timetable = await mcaS3collection.find();
-              console.log(timetable)
-              res.render('showAllDayTimeTable',{data:timetable});
-            }else if(course=="MSC"&&semester=="S4"){
-              const timetable = await mscS4collection.find();
-              console.log(timetable)
-              res.render('showAllDayTimeTable',{data:timetable});
-            }
+            const timetable = await getAllTimetables(course,semester);
+            res.render('showAllDayTimeTable',{data:timetable.timetable});
           },
           studentDetails:async(req,res)=>{
-              const data = await studentCollection.find()
+              const data = await studentCollection.find().lean();
               console.log(data)
               res.render('studentDetails',{data:data});
           },
           facultyDetails:async(req,res)=>{
-              const data = await facultyCollection.find();
+              const data = await facultyCollection.find().lean();
               console.log(data);
               res.render('facultyDetails',{data})
           },
@@ -512,9 +452,10 @@ module.exports = {
             const d = new Date();
             let day = days[d.getDay()];
             const currentDay = "Monday";
-            const facultyId = '678b7b15ba4374282dc534ed';
+            const facultyId2 = "678e0c486e87c12a6f8150d3"
+            const facultyId = '678f8057b3228bde3727b712';
             // const facultyId = req.session.facultyId;
-            const facultyName = await facultyCollection.findOne({_id:facultyId},{name:1});
+            const facultyName = await facultyCollection.findOne({_id:facultyId2},{name:1});
             console.log(facultyName.name);
             const timetables = await getTimetablesForTutor(currentDay, facultyName.name);
             console.log(timetables)
@@ -679,7 +620,7 @@ module.exports = {
             req.session.course = course;
             req.session.semester = semester;
             console.log(req.session)
-            const tutors = await facultyCollection.find({},{name:1});
+            const tutors = await facultyCollection.find({},{name:1}).lean();
             console.log(tutors);
            res.render('addTimetable',{course,semester,tutors}); 
           },
@@ -699,302 +640,30 @@ module.exports = {
 
 
           displayTimeTable:async(req,res)=>{
-
-           console.log(req.body);
            const course=req.body.course;
            const semester=req.body.semester;
            req.session.course =course;
            req.session.semester = semester;
           //  console.log(req.session.course)
-
-           if (course=="MCA" && semester=="S1"){
-            const data=  await mcaS1collection.find();
-            console.log(data);
-            res.render("timeTable",{data:data,course,semester});
-           }else if (course=="MCA" && semester=="S2"){
-            const data=  await mcaS2collection.find();
-            console.log(data);
-            res.render("timeTable",{data:data,course,semester});
-           }else if (course=="MCA" && semester=="S3"){
-            const data=  await mcaS3collection.find();
-            console.log(data);
-            res.render("timeTable",{data:data,course,semester});
-           }else if (course=="MCA" && semester=="S4"){
-            const data=  await mcaS4collection.find();
-            console.log(data);
-            res.render("timeTable",{data:data,course,semester});
-           }else if (course=="MSC" && semester=="S1"){
-            const data=  await mscS1collection.find();
-            console.log(data);
-            res.render("timeTable",{data:data,course,semester});
-           }else if (course=="MSC" && semester=="S2"){
-            const data=  await mscS2collection.find();
-            console.log(data);
-            res.render("timeTable",{data:data,course,semester});
-           }else if (course=="MSC" && semester=="S3"){
-            const data=  await mscS3collection.find();
-            console.log(data);
-            res.render("timeTable",{data:data,course,semester});
-           }else if (course=="MSC" && semester=="S4"){
-            const data=  await mscS4collection.find();
-            console.log(data);
-            res.render("timeTable",{data:data,course,semester});
-           }
+            const result = await getAllTimetablesForHOD(course,semester);
+            res.render("timeTable",{data:result,course,semester});
           },
-
           editTimeTable:async(req,res)=>{
-            console.log(req.params);
+            const id = req.params.id;
             const course=req.session.course;
             const semester=req.session.semester;
-            console.log(course);
-            if (course=="MCA"&& semester == "S1"){
-              const timetable= await mcaS1collection.findOne({_id:req.params.id});
-              console.log(timetable);
-              res.render("editTimeTable",{course,semester,data:timetable})
-            }else if(course=="MCA"&& semester == "S2"){
-              const timetable= await mcaS2collection.findOne({_id:req.params.id});
-              console.log(timetable);
-              res.render("editTimeTable",{course,semester,data:timetable})
-            }else if(course=="MCA"&& semester == "S3"){
-              const timetable= await mcaS3collection.findOne({_id:req.params.id});
-              console.log(timetable);
-              res.render("editTimeTable",{course,semester,data:timetable})
-          }else if(course=="MCA"&& semester == "S4"){
-            const timetable= await mcaS4collection.findOne({_id:req.params.id});
-            console.log(timetable);
-            res.render("editTimeTable",{course,semester,data:timetable})
-          }else if(course=="MSC"&& semester == "S1"){
-            const timetable= await mscS1collection.findOne({_id:req.params.id});
-            console.log(timetable);
-            res.render("editTimeTable",{course,semester,data:timetable})
-          }else if(course=="MSC"&& semester == "S2"){
-            const timetable= await mscS2collection.findOne({_id:req.params.id});
-            console.log(timetable);
-            res.render("editTimeTable",{course,semester,data:timetable})
-          }else if(course=="MSC"&& semester == "S3"){
-            const timetable= await mscS3collection.findOne({_id:req.params.id});
-            console.log(timetable);
-            res.render("editTimeTable",{course,semester,data:timetable})
-          }else if(course=="MSC"&& semester == "S4"){
-            const timetable= await mscS4collection.findOne({_id:req.params.id});
-            console.log(timetable);
-            res.render("editTimeTable",{course,semester,data:timetable})
-          }
+            const result = await getTimeTableByeId({course,semester,id},res);
+            res.render("editTimeTable",{course,semester,data:result})
          },
          saveEditedTimetable:async(req,res)=>{
            const id = req.params.id
            const course = req.session.course
            const semester = req.session.semester
-           console.log(id)
-           if(course == "MCA" && semester == "S1"){
-            const updatedData = await mcaS1collection.findByIdAndUpdate({_id:id},{
-              day:req.body.day,
-              'firstPeriod.0.subject':req.body.subject1,
-              'firstPeriod.0.startingTime':req.body.startTime1,
-              'firstPeriod.0.endingTime':req.body.endTime1,
-              'firstPeriod.0.tutor':req.body.tutor1,
-              'secondPeriod.0.subject':req.body.subject2,
-              'secondPeriod.0.startingTime':req.body.startTime2,
-              'secondPeriod.0.endingTime':req.body.endTime2,
-              'secondPeriod.0.tutor':req.body.tutor2,
-              'thirdPeriod.0.subject':req.body.subject3,
-              'thirdPeriod.0.startingTime':req.body.startTime3,
-              'thirdPeriod.0.endingTime':req.body.endTime3,
-              'thirdPeriod.0.tutor':req.body.tutor3,
-              'fourthPeriod.0.subject':req.body.subject4,
-              'fourthPeriod.0.startingTime':req.body.startTime4,
-              'fourthPeriod.0.endingTime':req.body.endTime4,
-              'fourthPeriod.0.tutor':req.body.tutor4,
-              'fifthPeriod.0.subject':req.body.subject5,
-              'fifthPeriod.0.startingTime':req.body.startTime5,
-              'fifthPeriod.0.endingTime':req.body.endTime5,
-              'fifthPeriod.0.tutor':req.body.tutor5
-             },{new:true,runValidators:true});
-             const data = await mcaS1collection.find();
-             res.render("timeTable",{data:data,course:req.session.course,semester:req.session.semester});
-           }else if(course == "MCA" && semester == "S2"){
-            const updatedData = await mcaS2collection.findByIdAndUpdate({_id:id},{
-              day:req.body.day,
-              'firstPeriod.0.subject':req.body.subject1,
-              'firstPeriod.0.startingTime':req.body.startTime1,
-              'firstPeriod.0.endingTime':req.body.endTime1,
-              'firstPeriod.0.tutor':req.body.tutor1,
-              'secondPeriod.0.subject':req.body.subject2,
-              'secondPeriod.0.startingTime':req.body.startTime2,
-              'secondPeriod.0.endingTime':req.body.endTime2,
-              'secondPeriod.0.tutor':req.body.tutor2,
-              'thirdPeriod.0.subject':req.body.subject3,
-              'thirdPeriod.0.startingTime':req.body.startTime3,
-              'thirdPeriod.0.endingTime':req.body.endTime3,
-              'thirdPeriod.0.tutor':req.body.tutor3,
-              'fourthPeriod.0.subject':req.body.subject4,
-              'fourthPeriod.0.startingTime':req.body.startTime4,
-              'fourthPeriod.0.endingTime':req.body.endTime4,
-              'fourthPeriod.0.tutor':req.body.tutor4,
-              'fifthPeriod.0.subject':req.body.subject5,
-              'fifthPeriod.0.startingTime':req.body.startTime5,
-              'fifthPeriod.0.endingTime':req.body.endTime5,
-              'fifthPeriod.0.tutor':req.body.tutor5
-             },{new:true,runValidators:true});
-             const data = await mcaS2collection.find();
-             res.render("timeTable",{data:data,course:req.session.course,semester:req.session.semester});
-           }else if(course == "MCA" && semester == "S3"){
-            const updatedData = await mcaS3collection.findByIdAndUpdate({_id:id},{
-              day:req.body.day,
-              'firstPeriod.0.subject':req.body.subject1,
-              'firstPeriod.0.startingTime':req.body.startTime1,
-              'firstPeriod.0.endingTime':req.body.endTime1,
-              'firstPeriod.0.tutor':req.body.tutor1,
-              'secondPeriod.0.subject':req.body.subject2,
-              'secondPeriod.0.startingTime':req.body.startTime2,
-              'secondPeriod.0.endingTime':req.body.endTime2,
-              'secondPeriod.0.tutor':req.body.tutor2,
-              'thirdPeriod.0.subject':req.body.subject3,
-              'thirdPeriod.0.startingTime':req.body.startTime3,
-              'thirdPeriod.0.endingTime':req.body.endTime3,
-              'thirdPeriod.0.tutor':req.body.tutor3,
-              'fourthPeriod.0.subject':req.body.subject4,
-              'fourthPeriod.0.startingTime':req.body.startTime4,
-              'fourthPeriod.0.endingTime':req.body.endTime4,
-              'fourthPeriod.0.tutor':req.body.tutor4,
-              'fifthPeriod.0.subject':req.body.subject5,
-              'fifthPeriod.0.startingTime':req.body.startTime5,
-              'fifthPeriod.0.endingTime':req.body.endTime5,
-              'fifthPeriod.0.tutor':req.body.tutor5
-             },{new:true,runValidators:true});
-             const data = await mcaS3collection.find();
-             res.render("timeTable",{data:data,course:req.session.course,semester:req.session.semester});
-           }else if(course == "MCA" && semester == "S4"){
-            const updatedData = await mcaS4collection.findByIdAndUpdate({_id:id},{
-              day:req.body.day,
-              'firstPeriod.0.subject':req.body.subject1,
-              'firstPeriod.0.startingTime':req.body.startTime1,
-              'firstPeriod.0.endingTime':req.body.endTime1,
-              'firstPeriod.0.tutor':req.body.tutor1,
-              'secondPeriod.0.subject':req.body.subject2,
-              'secondPeriod.0.startingTime':req.body.startTime2,
-              'secondPeriod.0.endingTime':req.body.endTime2,
-              'secondPeriod.0.tutor':req.body.tutor2,
-              'thirdPeriod.0.subject':req.body.subject3,
-              'thirdPeriod.0.startingTime':req.body.startTime3,
-              'thirdPeriod.0.endingTime':req.body.endTime3,
-              'thirdPeriod.0.tutor':req.body.tutor3,
-              'fourthPeriod.0.subject':req.body.subject4,
-              'fourthPeriod.0.startingTime':req.body.startTime4,
-              'fourthPeriod.0.endingTime':req.body.endTime4,
-              'fourthPeriod.0.tutor':req.body.tutor4,
-              'fifthPeriod.0.subject':req.body.subject5,
-              'fifthPeriod.0.startingTime':req.body.startTime5,
-              'fifthPeriod.0.endingTime':req.body.endTime5,
-              'fifthPeriod.0.tutor':req.body.tutor5
-             },{new:true,runValidators:true});
-             const data = await mcaS4collection.find();
-             res.render("timeTable",{data:data,course:req.session.course,semester:req.session.semester});
-           }else if(course == "MSC" && semester == "S1"){
-            const updatedData = await mscS1collection.findByIdAndUpdate({_id:id},{
-              day:req.body.day,
-              'firstPeriod.0.subject':req.body.subject1,
-              'firstPeriod.0.startingTime':req.body.startTime1,
-              'firstPeriod.0.endingTime':req.body.endTime1,
-              'firstPeriod.0.tutor':req.body.tutor1,
-              'secondPeriod.0.subject':req.body.subject2,
-              'secondPeriod.0.startingTime':req.body.startTime2,
-              'secondPeriod.0.endingTime':req.body.endTime2,
-              'secondPeriod.0.tutor':req.body.tutor2,
-              'thirdPeriod.0.subject':req.body.subject3,
-              'thirdPeriod.0.startingTime':req.body.startTime3,
-              'thirdPeriod.0.endingTime':req.body.endTime3,
-              'thirdPeriod.0.tutor':req.body.tutor3,
-              'fourthPeriod.0.subject':req.body.subject4,
-              'fourthPeriod.0.startingTime':req.body.startTime4,
-              'fourthPeriod.0.endingTime':req.body.endTime4,
-              'fourthPeriod.0.tutor':req.body.tutor4,
-              'fifthPeriod.0.subject':req.body.subject5,
-              'fifthPeriod.0.startingTime':req.body.startTime5,
-              'fifthPeriod.0.endingTime':req.body.endTime5,
-              'fifthPeriod.0.tutor':req.body.tutor5
-             },{new:true,runValidators:true});
-             const data = await mscS1collection.find();
-             res.render("timeTable",{data:data,course:req.session.course,semester:req.session.semester});
-           }else if(course == "MSC" && semester == "S2"){
-            const updatedData = await mscS2collection.findByIdAndUpdate({_id:id},{
-              day:req.body.day,
-              'firstPeriod.0.subject':req.body.subject1,
-              'firstPeriod.0.startingTime':req.body.startTime1,
-              'firstPeriod.0.endingTime':req.body.endTime1,
-              'firstPeriod.0.tutor':req.body.tutor1,
-              'secondPeriod.0.subject':req.body.subject2,
-              'secondPeriod.0.startingTime':req.body.startTime2,
-              'secondPeriod.0.endingTime':req.body.endTime2,
-              'secondPeriod.0.tutor':req.body.tutor2,
-              'thirdPeriod.0.subject':req.body.subject3,
-              'thirdPeriod.0.startingTime':req.body.startTime3,
-              'thirdPeriod.0.endingTime':req.body.endTime3,
-              'thirdPeriod.0.tutor':req.body.tutor3,
-              'fourthPeriod.0.subject':req.body.subject4,
-              'fourthPeriod.0.startingTime':req.body.startTime4,
-              'fourthPeriod.0.endingTime':req.body.endTime4,
-              'fourthPeriod.0.tutor':req.body.tutor4,
-              'fifthPeriod.0.subject':req.body.subject5,
-              'fifthPeriod.0.startingTime':req.body.startTime5,
-              'fifthPeriod.0.endingTime':req.body.endTime5,
-              'fifthPeriod.0.tutor':req.body.tutor5
-             },{new:true,runValidators:true});
-             const data = await mscS2collection.find();
-             res.render("timeTable",{data:data,course:req.session.course,semester:req.session.semester});
-           }else if(course == "MSC" && semester == "S3"){
-            const updatedData = await mscS3collection.findByIdAndUpdate({_id:id},{
-              day:req.body.day,
-              'firstPeriod.0.subject':req.body.subject1,
-              'firstPeriod.0.startingTime':req.body.startTime1,
-              'firstPeriod.0.endingTime':req.body.endTime1,
-              'firstPeriod.0.tutor':req.body.tutor1,
-              'secondPeriod.0.subject':req.body.subject2,
-              'secondPeriod.0.startingTime':req.body.startTime2,
-              'secondPeriod.0.endingTime':req.body.endTime2,
-              'secondPeriod.0.tutor':req.body.tutor2,
-              'thirdPeriod.0.subject':req.body.subject3,
-              'thirdPeriod.0.startingTime':req.body.startTime3,
-              'thirdPeriod.0.endingTime':req.body.endTime3,
-              'thirdPeriod.0.tutor':req.body.tutor3,
-              'fourthPeriod.0.subject':req.body.subject4,
-              'fourthPeriod.0.startingTime':req.body.startTime4,
-              'fourthPeriod.0.endingTime':req.body.endTime4,
-              'fourthPeriod.0.tutor':req.body.tutor4,
-              'fifthPeriod.0.subject':req.body.subject5,
-              'fifthPeriod.0.startingTime':req.body.startTime5,
-              'fifthPeriod.0.endingTime':req.body.endTime5,
-              'fifthPeriod.0.tutor':req.body.tutor5
-             },{new:true,runValidators:true});
-             const data = await mscS3collection.find();
-             res.render("timeTable",{data:data,course:req.session.course,semester:req.session.semester});
-           }else if(course == "MSC" && semester == "S4"){
-            const updatedData = await mscS4collection.findByIdAndUpdate({_id:id},{
-              day:req.body.day,
-              'firstPeriod.0.subject':req.body.subject1,
-              'firstPeriod.0.startingTime':req.body.startTime1,
-              'firstPeriod.0.endingTime':req.body.endTime1,
-              'firstPeriod.0.tutor':req.body.tutor1,
-              'secondPeriod.0.subject':req.body.subject2,
-              'secondPeriod.0.startingTime':req.body.startTime2,
-              'secondPeriod.0.endingTime':req.body.endTime2,
-              'secondPeriod.0.tutor':req.body.tutor2,
-              'thirdPeriod.0.subject':req.body.subject3,
-              'thirdPeriod.0.startingTime':req.body.startTime3,
-              'thirdPeriod.0.endingTime':req.body.endTime3,
-              'thirdPeriod.0.tutor':req.body.tutor3,
-              'fourthPeriod.0.subject':req.body.subject4,
-              'fourthPeriod.0.startingTime':req.body.startTime4,
-              'fourthPeriod.0.endingTime':req.body.endTime4,
-              'fourthPeriod.0.tutor':req.body.tutor4,
-              'fifthPeriod.0.subject':req.body.subject5,
-              'fifthPeriod.0.startingTime':req.body.startTime5,
-              'fifthPeriod.0.endingTime':req.body.endTime5,
-              'fifthPeriod.0.tutor':req.body.tutor5
-             },{new:true,runValidators:true});
-             const data = await mscS4collection.find();
-             res.render("timeTable",{data:data,course:req.session.course,semester:req.session.semester});
-           }
+           const data = req.body
+           const result = await editAndUpdatedTable({course,semester,id,data},res);
+           const updatedData = await getAllTimetablesForHOD(course,semester);
+           console.log(updatedData);
+           res.render("timeTable",{data:updatedData,course:req.session.course,semester:req.session.semester});
          },
          getAlldayTimeTable:async (req,res)=>{
             res.render("AllTimeTableForFaculty")
@@ -1020,7 +689,7 @@ module.exports = {
          },
          editStudentDetails:async(req,res)=>{
           const id = req.params.id;
-          const result = await studentCollection.findOne({_id:id});
+          const result = await studentCollection.findOne({_id:id}).lean();
           console.log(result)
           res.render("editStudendDetails",{data:result})
          },
@@ -1039,7 +708,7 @@ module.exports = {
          },
          editFaculty:async(req,res)=>{
           const id = req.params.id
-          const result = await facultyCollection.findOne({_id:id})
+          const result = await facultyCollection.findOne({_id:id}).lean();
           res.render("editfacultyDetials",{data:result});
          },
          saveEditedFacultyDetails:async(req,res)=>{
@@ -1052,7 +721,31 @@ module.exports = {
           })
           console.log(result);
           res.redirect("/faculty-details")
+         },
+         sendInformations:async (req,res)=>{
+          res.render("sendMail")
+         },
+         sendinginformationMail:async (req,res)=>{
+          console.log(req.body);
+          const course = req.body.course
+          const semester = req.body.semester
+          const subject = req.body.emailSubject;
+          const message = req.body.emailMessage;
+          const emails = await getStudentEmail(course,semester);
+          console.log(emails);
+          const result = await sendInfoEmail({course,semester,emails,subject,message},res);
+          res.redirect("/send-informations")
+         },
+         sendinginformationMailToAll:async(req,res)=>{
+          console.log(req.body);
+          const subject = req.body.subject;
+          const message = req.body.message;
+          const emails = await getAllStudentEmail();
+          console.log(emails);
+          await sendInfoEmailToAll({subject,message,emails},res).then(()=>{
+            res.json({
+              status:"SUCCESS"
+            });
+          });
          }
 }
-
-

@@ -78,7 +78,7 @@ const timetableCollections = {
         
             // Print the results
             console.log('Student Schedules:');
-            console.log(JSON.stringify(results, null, 2));
+            JSON.stringify(results, null, 2);
             
             return results;
           } catch (err) {
@@ -92,7 +92,6 @@ const timetableCollections = {
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const d = new Date();
 let day = days[d.getDay()];
-console.log(day);
 cron.schedule('0 0 * * *', async () => {
     console.log('Function executed at midnight!');
     await Student.deleteMany({}).then(()=>{
