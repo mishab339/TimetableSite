@@ -22,6 +22,7 @@ const twilioClient = twilio(accountSid, authToken);
       }
      async function sendReminders(){
         const students = await Student.find();
+        console.log(students);
         const now = new Date();
         const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now
           .getMinutes()
@@ -29,6 +30,7 @@ const twilioClient = twilio(accountSid, authToken);
           .padStart(2, '0')}`;
         for (const student of students) {
           for (const period of student.schedule) {
+            console.log(period);
             if (period.startingTime === currentTime) {
               const message = `Hi ${student.name}, this is a reminder for your class on "${period.subject}" starting at ${period.startingTime}.`;
               await sendSMS(student.phone, message);
