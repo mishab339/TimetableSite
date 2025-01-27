@@ -1,5 +1,13 @@
-
-
+#successMsg{
+  color: green;
+  font-size: 18px;
+}
+#login-welcome{
+  position: relative;
+  top: 140px;
+  left: 0px;
+  border-bottom: none
+}
 /* Timetable Container */
 .timetable-container {
 position: relative;
