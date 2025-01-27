@@ -18,12 +18,13 @@ const { get } = require('mongoose');
 
 
 // Dynamic collection mapping
-const collectionMapping = {
-    "MCA-S1": mcaS1collection,
-    "MSC-S1": mscS1collection,
-    "MCA-S2": mcaS2collection,
-    "MSC-S2": mscS2collection
-};
+// const collectionMapping = {
+//     "MCA-S1": mcaS1collection,
+//     "MSC-S1": mscS1collection,
+//     "MCA-S2": mcaS2collection,
+//     "MSC-S2": mscS2collection
+// };
+
 module.exports = {
     Home:async(req,res)=>{
       res.render("index",{usermode:req.session});
@@ -37,8 +38,16 @@ module.exports = {
     },
 
     signup: async(req,res)=>{
+
       const { usertype } = req.body; 
-      
+      const errors = {}
+      if(!usertype){
+        errors.usertype = "usertype is required";
+      }
+      if (Object.keys(errors).length > 0) {
+        return res.render("role",{errors});
+      }
+
       if(usertype==='Student'){
         res.render("studentSignup");
       }
@@ -48,17 +57,14 @@ module.exports = {
       else{
         res.render("facultySignup");
       }
-      
-      
-
-        //res.render("signup");
     },
 
     studentSignup_validation: async(req,res)=>{
         const data = req.body;  // Store the entire request body
         const { name, email, phone, username, password, usertype,course, semester } = data;  // Destructure individual fields from `data`
         const errors = {};
-        
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const phoneRegex = /^[0-9]{10}$/;
 
         // Validate input fields
         if (!name) {
@@ -66,9 +72,13 @@ module.exports = {
         }
         if (!email) {
             errors.email = "*Email is required.";
+        }else if(!emailRegex.test(email)){
+            errors.email = "*Please enter a valid email address.";
         }
         if (!phone) {
             errors.phone = "*Phone number is required.";
+        }else if(!phoneRegex.test(phone)){
+            errors.phone = "*Please enter a valid 10-digit phone number.";
         }
         if (!username) {
             errors.username = "*Username is required.";
@@ -85,7 +95,7 @@ module.exports = {
         if (!semester) {
             errors.semester = "*Semester is required.";
         }
-
+     
         // If there are validation errors, re-render the signup page with error messages
         if (Object.keys(errors).length > 0) {
             return res.render("studentSignup", {
@@ -135,17 +145,22 @@ module.exports = {
               const data = req.body;  // Store the entire request body
               const { name, email, phone, username, password, usertype } = data;  // Destructure individual fields from `data`
               const errors = {};
-              
+              const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+              const phoneRegex = /^[0-9]{10}$/;
       
               // Validate input fields
               if (!name) {
                   errors.name = "*Name is required.";
               }
               if (!email) {
-                  errors.email = "*Email is required.";
+                errors.email = "*Email is required.";
+              }else if(!emailRegex.test(email)){
+                errors.email = "*Please enter a valid email address.";
               }
               if (!phone) {
-                  errors.phone = "*Phone number is required.";
+                errors.phone = "*Phone number is required.";
+              }else if(!phoneRegex.test(phone)){
+                errors.phone = "*Please enter a valid 10-digit phone number.";
               }
               if (!username) {
                   errors.username = "*Username is required.";
@@ -192,21 +207,15 @@ module.exports = {
                   }
       
                   // Insert data into the database
-                  await facultyCollection.insertMany([data]);
-      
+                  const result = await facultyCollection.insertMany([data]);
+                  console.log(result);
                   // Redirect to welcome page
-                  res.redirect("/login");
+                  res.render("login",{name:data.name});
               } catch (error) {
                   console.error("Error during signup:", error);
                   res.send("Error during signup. Please try again.");
               }
                   },
-
-
-
-
-
-
       login_validation: async(req,res)=>{
                 const { username, password,usertype } = req.body;
                 const errors = {};
@@ -495,9 +504,6 @@ module.exports = {
             console.log(err);
           }
           },
-
-
-          
           getTimeTable:async(req,res)=>{
             const course=req.session.course;
             const semester=req.session.semester;
@@ -644,15 +650,18 @@ module.exports = {
           res.render("sendMail",{usermode:req.session})
          },
          sendinginformationMail:async (req,res)=>{
-          console.log(req.body);
+          const errors = {}
           const course = req.body.course
           const semester = req.body.semester
           const subject = req.body.emailSubject;
           const message = req.body.emailMessage;
+          if(!course||!semester||!subject||!message){
+            errors.msg = "Please enter all creadential"
+            res.render("sendMail",{errors})
+          }
           const emails = await getStudentEmail(course,semester);
-          console.log(emails);
           const result = await sendInfoEmail({course,semester,emails,subject,message},res);
-          res.redirect("/send-informations")
+          res.render("sendMail",{result,usermode:req.session}); 
          },
          sendinginformationMailToAll:async(req,res)=>{
           console.log(req.body);

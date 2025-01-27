@@ -4,9 +4,13 @@
       .error { color: red; font-size: 0.9em; }
     </style>
     <div class="container">
+     {{#if result}}
+      <h4 class="fac-h2" id="login-welcome">Welcome <span>{{name}}</span></h4>
+     {{/if}}
       <div class="login-form">
         <div class="forms">
           <div class="form login">
+          
             <span class="title">Login</span>
 
             <form id="loginForm" action="/login" method="post">
