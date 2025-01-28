@@ -4,10 +4,11 @@ require("../utils/sendingPeriodRemainders");
 const studentCollection = require('../models/studentUser');
 const facultyCollection = require('../models/facultyUser');
 const notificationCollection = require("../models/maileToStudModel");
+const bcrypt = require("bcrypt");
 // Import collections
-const { mcaS1collection,mcaS2collection,mcaS3collection,mcaS4collection,
-  mscS1collection,mscS2collection,mscS3collection,mscS4collection 
-} = require('../models/timetable');
+// const { mcaS1collection,mcaS2collection,mcaS3collection,mcaS4collection,
+//   mscS1collection,mscS2collection,mscS3collection,mscS4collection 
+// } = require('../models/timetable');
 const {getTimetablesForTutor,getAllTimetables,
        currentDayTimeTable,getStudentEmail,
        getAllStudentEmail,getAllTimetablesForHOD,
@@ -113,6 +114,7 @@ module.exports = {
         try {
             // Check if the username already exists in the database
             const existingUser = await studentCollection.findOne({ username });
+            const existingEmail = await studentCollection.findOne({email});
 
             // If the username exists, return an error message
             if (existingUser) {
@@ -128,7 +130,23 @@ module.exports = {
                 semester: req.body.semester
             });
             }
-
+            if (existingEmail) {
+              errors.email = "Email already taken. Please choose another one.";
+              return res.render("studentSignup", {
+                  errors, 
+                  username: req.body.username, 
+                  name: req.body.name,
+                  email: req.body.email,
+                  phone: req.body.phone,
+                  password: req.body.password,
+                  course: req.body.course,
+                  semester: req.body.semester
+              });
+              }
+            const saltround = 10;
+            const hashedpassword = await bcrypt.hash(data.password,saltround);
+            data.password = hashedpassword
+            console.log(data);
             // Insert data into the database
             await studentCollection.insertMany([data]);
 
@@ -190,6 +208,7 @@ module.exports = {
               try {
                   // Check if the username already exists in the database
                   const existingUser = await facultyCollection.findOne({ username });
+                  const existingEmail = await facultyCollection.findOne({email});
       
                   // If the username exists, return an error message
                   if (existingUser) {
@@ -205,7 +224,22 @@ module.exports = {
                       
                   });
                   }
-      
+                  if (existingEmail) {
+                    errors.username = "Email already taken. Please choose another one.";
+                    return res.render("facultySignup", {
+                        errors, 
+                        username: req.body.username, 
+                        name: req.body.name,
+                        email: req.body.email,
+                        phone: req.body.phone,
+                        password: req.body.password,
+                        usertype: req.body.usertype,
+                        
+                    });
+                    }
+                  const saltround = 10;
+                  const hashedpassword = await bcrypt.hash(data.password,saltround);
+                  data.password = hashedpassword
                   // Insert data into the database
                   const result = await facultyCollection.insertMany([data]);
                   console.log(result);
@@ -248,9 +282,11 @@ module.exports = {
                     errors.username = "Username not found.";
                     return res.render("login", { errors, username,password});
                   }
-              
+                  const hashedpassword = user.password
+                  const matchedPassword = await bcrypt.compare(password,hashedpassword)
+                  console.log(matchedPassword);
                   // Check if the password matches
-                  if (user.password !== password) {
+                  if (!matchedPassword) {
                     errors.password = "Incorrect password.";
                     return res.render("login", { errors, username });
                   }
@@ -292,9 +328,11 @@ module.exports = {
                     errors.username = "Username not found.";
                     return res.render("login", { errors, username,password });
                   }
-              
+                  const hashedpassword = user.password
+                  const matchedPassword = await bcrypt.compare(password,hashedpassword)
+                  console.log(matchedPassword);
                   // Check if the password matches
-                  if (user.password !== password) {
+                  if (!matchedPassword) {
                     errors.password = "Incorrect password.";
                     return res.render("login", { errors, username });
                   }

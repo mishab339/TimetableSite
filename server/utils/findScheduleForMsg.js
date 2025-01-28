@@ -36,7 +36,6 @@ const timetableCollections = {
         try {
             // Fetch all students
             const students = await studentCollection.find();
-        
             const results = [];
         
             for (const student of students) {
@@ -45,7 +44,6 @@ const timetableCollections = {
               // Determine the correct timetable collection based on course and semester
               const collectionKey = `${course.toUpperCase()}-${semester.toUpperCase()}`;
               const timetableCollection = timetableCollections[collectionKey];
-        
               if (!timetableCollection) {
                 console.error(`No timetable found for course ${course} and semester ${semester}`);
                 continue;
@@ -53,7 +51,6 @@ const timetableCollections = {
         
               // Fetch the timetable for the given day
               const timetable = await timetableCollection.findOne({ day });
-        
               if (!timetable) {
                 console.log(`No timetable found for ${day} for course ${course} semester ${semester}`);
                 continue;
@@ -79,7 +76,6 @@ const timetableCollections = {
             // Print the results
             console.log('Student Schedules:');
             JSON.stringify(results, null, 2);
-            
             return results;
           } catch (err) {
             console.error('Error fetching data:', err);
