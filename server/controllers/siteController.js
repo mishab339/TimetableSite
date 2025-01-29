@@ -365,11 +365,16 @@ module.exports = {
                     return res.render("login", { errors, username,password });
                   }
               
+                  const hashedpassword = user.password
+                  console.log(hashedpassword);
+                  const matchedPassword = await bcrypt.compare(password,hashedpassword)
+                  console.log(matchedPassword);
                   // Check if the password matches
-                  if (user.password !== password) {
+                  if (!matchedPassword) {
                     errors.password = "Incorrect password.";
                     return res.render("login", { errors, username });
                   }
+
                   if (user.usertype !== usertype) {
                     errors.usertype = "Role not matched.";
                     return res.render("login", { errors, username,password });
@@ -381,8 +386,7 @@ module.exports = {
                   req.session.isHOD = true  
                   req.session.isLogin=true  
                   console.log(req.session)   
-                  // Redirect to home page and pass the username          
-                  
+                  // Redirect to home page and pass the username         
                    res.render('index',{ name: user.name,usermode:req.session});                                               
                 } 
                 catch (error) {
@@ -615,16 +619,17 @@ module.exports = {
             const course=req.session.course;
             const semester=req.session.semester;
             const result = await getTimeTableByeId({course,semester,id},res);
-            res.render("editTimeTable",{course,semester,data:result,usermode:req.session})
+            const tutors = await facultyCollection.find({},{name:1}).lean();
+            res.render("editTimeTable",{course,tutors,semester,data:result,usermode:req.session})
          },
          saveEditedTimetable:async(req,res)=>{
            const id = req.params.id
            const course = req.session.course
            const semester = req.session.semester
            const data = req.body
+           console.log(data);
            const result = await editAndUpdatedTable({course,semester,id,data},res);
            const updatedData = await getAllTimetablesForHOD(course,semester);
-           console.log(updatedData);
            res.render("timeTable",{data:updatedData,course:req.session.course,semester:req.session.semester,usermode:req.session});
          },
          getAlldayTimeTable:async (req,res)=>{
