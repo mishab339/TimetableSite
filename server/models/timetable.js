@@ -21,14 +21,12 @@ const timetableSchema = new mongoose.Schema({
         },
         tutor:{
             type:String,
-            required:true
         }
     }
     ],
     secondPeriod:[{
         subject:{
             type:String,
-           //required:true
         },
         startingTime:{
             type:String,
@@ -40,14 +38,12 @@ const timetableSchema = new mongoose.Schema({
         },
         tutor:{
             type:String,
-           //required:true
         }
     }
     ],
     thirdPeriod:[{
         subject:{
             type:String,
-           //required:true
         },
         startingTime:{
             type:String,
@@ -59,14 +55,12 @@ const timetableSchema = new mongoose.Schema({
         },
         tutor:{
             type:String,
-           //required:true
         }
     }
     ],
     fourthPeriod:[{
         subject:{
             type:String,
-           //required:true
         },
         startingTime:{
             type:String,
@@ -78,14 +72,12 @@ const timetableSchema = new mongoose.Schema({
         },
         tutor:{
             type:String,
-           //required:true
         }
     }
     ],
     fifthPeriod:[{
         subject:{
             type:String,
-           //required:true
         },
         startingTime:{
             type:String,
@@ -97,13 +89,10 @@ const timetableSchema = new mongoose.Schema({
         },
         tutor:{
             type:String,
-           //required:true
         }
     }
     ]
 })
-
-//const timetableCollection = new mongoose.model("timetableCollection",timetableSchema);
 const mcaS1collection = mongoose.model("mcaS1collection", timetableSchema);
 const mcaS2collection = mongoose.model("mcaS2collection", timetableSchema);
 const mcaS3collection = mongoose.model("mcaS3collection", timetableSchema);
@@ -115,7 +104,6 @@ const mscS4collection = mongoose.model("mscS4collection", timetableSchema);
 
 
 module.exports = {
-    //timetableCollection,
     mcaS1collection,
     mcaS2collection,
     mcaS3collection,
