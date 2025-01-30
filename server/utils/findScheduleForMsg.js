@@ -88,11 +88,30 @@ const timetableCollections = {
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const d = new Date();
 let day = days[d.getDay()];
+
+async function executeStudentScheduleUpdate() {
+  try {
+      await Student.deleteMany({});
+      const results = await getStudentSchedule(day);
+      const data = await Student.insertMany(results);
+      console.log('Student schedule updated successfully:', data);
+  } catch (error) {
+      console.error('Error updating student schedule:', error);
+  }
+}
+
 cron.schedule('0 0 * * *', async () => {
-    console.log('Function executed at midnight!');
-    await Student.deleteMany({}).then(()=>{
-        getStudentSchedule(day).then(async (results)=>{
-            const data = await Student.insertMany(results);
-        });
-    })
-  });
+  console.log('Function executed at 12:00 AM!');
+  await executeStudentScheduleUpdate();
+});
+
+cron.schedule('0 2 * * *', async () => {
+  console.log('Function executed at 2:00 AM!');
+  await executeStudentScheduleUpdate();
+});
+
+cron.schedule('0 4 * * *', async () => {
+  console.log('Function executed at 4:00 AM!');
+  await executeStudentScheduleUpdate();
+});
+

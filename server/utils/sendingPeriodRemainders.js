@@ -26,11 +26,11 @@ const twilioClient = twilio(accountSid, authToken);
           .getMinutes()
           .toString()
           .padStart(2, '0')}`;
-
+           console.log(currentTime)
           const students = await Student.find({
-            'schedule.startingTime': "09:30",
+            'schedule.startingTime':currentTime,
           });
-        
+          console.log(students)
           if (students.length === 0) {
             console.log('No reminders to send at this time.');
             return;
