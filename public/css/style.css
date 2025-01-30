@@ -8,6 +8,7 @@
   left: 0px;
   border-bottom: none
 }
+<<<<<<< HEAD
 #passwordshow{
     height: 0;
     width: 0px;
@@ -20,6 +21,8 @@
 #faculty-login-form{
   margin-top: 2rem;
 }
+=======
+>>>>>>> a339ce04614246c11ebb2c613c23b078000d4489
 /* Timetable Container */
 .timetable-container {
 position: relative;
