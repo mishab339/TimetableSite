@@ -4,12 +4,11 @@ const timetableSchema = new mongoose.Schema({
 
     day:{
         type:String,
-       require:true
+        required:true
     },
     firstPeriod:[{
         subject:{
             type:String,
-            required:true
         },
         startingTime:{
             type:String,
