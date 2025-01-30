@@ -491,7 +491,7 @@ module.exports = {
           const studentData = await studentCollection.findOne({_id:studentId},{course:1,semester:1})
           const course = studentData.course
           const semester = studentData.semester
-          const timetable =await currentDayTimeTable(course,semester,"Monday");
+          const timetable =await currentDayTimeTable(course,semester,day);
           res.render('viewStudTimetable',{data:timetable[0],usermode:req.session});
           },
           showAllDayTimeTableForStudent:async(req,res)=>{
